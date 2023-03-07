@@ -85,7 +85,6 @@ Event::Event(int expectedAtendees, int conferenceNo, float span, char* eventName
     this->hostName = hostName;
 }
 
-
 //class Company {
 //private:
 //
