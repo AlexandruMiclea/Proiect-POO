@@ -195,15 +195,94 @@ public:
 
 };
 
+int Company::countID = 100;
+
+Company::Company():companyID(countID++) {
+    this->hosting = false;
+    this->companyName = "New Company";
+    this->representativeNo = 0;
+    this->representatives.push_back("Representative Name");
+}
+
+Company::~Company(){
+    // destructor, need to find a use for it
+}
+
+Company::Company(bool hosting, string companyName, int representativeNo, vector <string> representatives) :companyID(countID++) {
+    this->hosting = hosting;
+    this->companyName = companyName;
+    this->representativeNo = representativeNo;
+    this->representatives = representatives;
+}
+Company::Company(const Company& company) :companyID(countID++) {
+    this->hosting = company.hosting;
+    this->companyName = company.companyName;
+    this->representativeNo = company.representativeNo;
+    this->representatives = company.representatives;
+}
+
+istream& operator >>(istream& in, Company& company) {
+    cout << "What is your company's name: ";
+    in >> company.companyName;
+    
+    cout << "Are you expected to host a conference: ";
+    in >> company.hosting;
+
+    cout << "How many representatives will be present from your company: ";
+    in >> company.representativeNo;
+
+    for (int i = 1; i <= company.representativeNo; i++) {
+        cout << "Enter the name of representative " << i << ": ";
+        string aux;
+        in >> aux;
+        company.representatives.push_back(aux);
+    }
+
+    cout << endl;
+    return in;
+}
+
+ostream& operator <<(ostream& out, const Company& company) {
+
+    out << "This company's name is " << company.companyName << endl;
+
+    out << "This company is ";
+    if (company.hosting == false) out << "NOT ";
+    out << "expected to host a conference at this event." << endl;
+
+    out << "This company will be represented by " << company.representativeNo << " individuals." << endl;
+    out << "Their names are as follows: " << endl;
+    for (int i = 1; i <= company.representativeNo; i++) {
+        out << i << ". " << company.representatives[i-1] << endl;
+    }
+    
+    return out;
+}
+
+
+Company& Company::operator=(const Company& company) {
+
+    if (this != &company) {
+        this->hosting = company.hosting;
+        this->companyName = company.companyName;
+        this->representativeNo = company.representativeNo;
+        this->representatives = company.representatives;
+    }
+    return *this;
+}
+
+
+
 class EventRoom {
 private:
 
-    static const int roomNo;
+    const int roomNo;
+    static int roomCnt;
 
     string roomName;
     int seatNo;
     char pavilion;
-    int noOfFAcilities;
+    int noOfFacilities;
     vector <string> facilities;
 
 
@@ -215,7 +294,7 @@ public:
     string getRoomName() { return this->roomName; };
     int getSeatNo() { return this->seatNo; };
     char getPavilion() { return this->pavilion; };
-    int getNoOfFacilities() { return this->noOfFAcilities; };
+    int getNoOfFacilities() { return this->noOfFacilities; };
     vector <string> getFacilities() { return this->facilities;};
 
     // setters 
@@ -223,19 +302,76 @@ public:
     void setRoomName(string roomName) { this->roomName = roomName; };
     void setSeatNo(int seatNo) { this->seatNo = seatNo; };
     void setPavilion(char pavilion) { this->pavilion = pavilion; };
-    void setNoOfFacilities(int noOfFAcilities) { this->noOfFAcilities = noOfFAcilities; };
+    void setNoOfFacilities(int noOfFacilities) { this->noOfFacilities = noOfFacilities; };
     void setFacilities(vector <string> facilities) { this->facilities = facilities;};
 
     EventRoom(); // empty constructor
     ~EventRoom(); // destructor
-    EventRoom(string roomName, int seatNo, char pavilion, vector <string> facilities); // full constructor
+    EventRoom(string roomName, int seatNo, char pavilion, int noOfFacilities, vector <string> facilities); // full constructor
     EventRoom(const EventRoom& event); // copy constructor
     friend ostream& operator <<(ostream& out, const EventRoom& eventRoom); // output operator overload
     friend istream& operator >>(istream& in, EventRoom& eventRoom); // input operator overload
-    EventRoom& operator=(const EventRoom& event); // = overload
+    EventRoom& operator=(const EventRoom& eventRoom); // = overload
 
 };
 
+int EventRoom::roomCnt = 200;
+
+EventRoom::EventRoom():roomNo(roomCnt++){
+    this->roomName = "New Room";
+    this->seatNo = 0;
+    this->pavilion = 'X';
+    this->noOfFacilities = 0;
+    this->facilities.push_back("");
+        
+}
+//~EventRoom(); // destructor
+
+EventRoom::EventRoom(string roomName, int seatNo, char pavilion, int noOfFacilities, vector <string> facilities) :roomNo(roomCnt++) {
+    this->roomName = roomName;
+    this->seatNo = seatNo;
+    this->pavilion = pavilion;
+    this->noOfFacilities = noOfFacilities;
+    this->facilities = facilities;
+}
+EventRoom::EventRoom(const EventRoom& eventRoom) :roomNo(roomCnt++) {
+    this->roomName = eventRoom.roomName;
+    this->seatNo = eventRoom.seatNo;
+    this->pavilion = eventRoom.pavilion;
+    this->noOfFacilities = eventRoom.noOfFacilities;
+    this->facilities = eventRoom.facilities;
+}
+ostream& operator <<(ostream& out, const EventRoom& eventRoom) {
+
+    out << "This room's name is " << eventRoom.roomName << "." << endl;
+    out << "It has a number of " << eventRoom.seatNo << " seats." << endl;
+    out << "It belongs to pavilion " << eventRoom.pavilion << "." << endl;
+    out << "It has " << eventRoom.noOfFacilities << " facilities, which are the following: " << endl;
+    for (int i = 1; i <= eventRoom.noOfFacilities; i++) {
+        out << i << ". " << eventRoom.facilities[i-1] << endl;
+    }
+    
+    return out;
+}
+
+istream& operator >>(istream& in, EventRoom& eventRoom) {
+
+    
+
+    return in;
+}
+
+EventRoom& EventRoom::operator=(const EventRoom& eventRoom){
+
+    if (this != &eventRoom) {
+        this->roomName = eventRoom.roomName;
+        this->seatNo = eventRoom.seatNo;
+        this->pavilion = eventRoom.pavilion;
+        this->facilities = eventRoom.facilities;
+    }
+
+    return *this;
+}
 
 
 class Conference {
@@ -281,6 +417,14 @@ public:
 
 };
 
+//Conference(); // empty constructor
+//~Conference(); // destructor
+//Conference(int expectedAtendees, float duration, string conferenceTitle, string hostingCompany, int hostNo, vector <string> hostNames); // full constructor
+//Conference(const Conference& conference); // copy constructor
+//friend ostream& operator <<(ostream& out, const Conference& conference); // output operator overload
+//friend istream& operator >>(istream& in, Conference& conference); // input operator overload
+//Conference& operator=(const Conference& conference); // = overload
+
 // ABOVE THIS LINE IS OK
 
 class Calendar {
@@ -321,10 +465,17 @@ public:
     Calendar& operator=(const Calendar& calendar); // = overload
 };
 
+//Calendar(); // empty constructor
+//~Calendar(); // destructor
+//Calendar(string calendarName, string eventType, string month, int noOfDays, int* dates); // full constructor
+//Calendar(const Calendar& calendar); // copy constructor
+//friend ostream& operator <<(ostream& out, const Calendar& calendar); // output operator overload
+//friend istream& operator >>(istream& in, Calendar& calendar); // input operator overload
+//Calendar& operator=(const Calendar& calendar); // = overload
 
 int main() {
 
-    Event a1;
+    /*Event a1;
     cout << a1.getConferenceNo();
     cout << a1.getEventID();
     cout << a1.getEventName();
@@ -341,7 +492,18 @@ int main() {
     cout << a4.getHostName() << endl;
 
     cin >> a3;
-    cout << a3;
+    cout << a3;*/
+
+    Company c1;
+    cout << c1.getCompanyName();
+
+    vector <string> aux;
+    aux.push_back("Copac");
+    aux.push_back("Masina Zdrobita");
+    aux.push_back("Securist ramas prin zona (se asigura ca moare ceo-ul).");
+
+    Company c2(true, "HexiPharma",3,aux);
+    cout << c2;
 
     return 0;
 }
