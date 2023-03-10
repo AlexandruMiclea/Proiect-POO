@@ -356,7 +356,24 @@ ostream& operator <<(ostream& out, const EventRoom& eventRoom) {
 
 istream& operator >>(istream& in, EventRoom& eventRoom) {
 
-    
+    cout << "What is this room's name: ";
+    in >> eventRoom.roomName;
+
+    cout << "How many seats does it have: ";
+    in >> eventRoom.seatNo;
+
+    cout << "In what pavilion does it exist: ";
+    in >> eventRoom.pavilion;
+
+    cout << "How many facilities does this room have: ";
+    in >> eventRoom.noOfFacilities;
+
+    for (int i = 1; i <= eventRoom.noOfFacilities; i++) {
+        cout << "Enter facility number " << i << ": ";
+        string aux;
+        in >> aux;
+        eventRoom.facilities.push_back(aux);
+    }
 
     return in;
 }
@@ -417,15 +434,87 @@ public:
 
 };
 
-//Conference(); // empty constructor
-//~Conference(); // destructor
-//Conference(int expectedAtendees, float duration, string conferenceTitle, string hostingCompany, int hostNo, vector <string> hostNames); // full constructor
-//Conference(const Conference& conference); // copy constructor
-//friend ostream& operator <<(ostream& out, const Conference& conference); // output operator overload
-//friend istream& operator >>(istream& in, Conference& conference); // input operator overload
-//Conference& operator=(const Conference& conference); // = overload
+int Conference::countConference = 1000;
 
-// ABOVE THIS LINE IS OK
+Conference::Conference():conferenceID(countConference++) {
+    this->expectedAtendees = 0;
+    this->duration = 0.0f;
+    this->conferenceTitle = "New Conference";
+    this->hostingCompany = "Unassigned Company";
+    this->hostNo = 0;
+    this->hostNames.push_back("");
+}
+//~Conference(); // destructor
+
+Conference::Conference(int expectedAtendees, float duration, string conferenceTitle, string hostingCompany, int hostNo, vector <string> hostNames) :conferenceID(countConference++) {
+    this->expectedAtendees = expectedAtendees;
+    this->duration = duration;
+    this->conferenceTitle = conferenceTitle;
+    this->hostingCompany = hostingCompany;
+    this->hostNo = hostNo;
+    this->hostNames = hostNames;
+}
+
+Conference::Conference(const Conference& conference) :conferenceID(countConference++) {
+    this->expectedAtendees = conference.expectedAtendees;
+    this->duration = conference.duration;
+    this->conferenceTitle = conference.conferenceTitle;
+    this->hostingCompany = conference.hostingCompany;
+    this->hostNo = conference.hostNo;
+    this->hostNames = conference.hostNames;
+}
+ostream& operator <<(ostream& out, const Conference& conference) {
+
+    out << "The conference's title is " << conference.conferenceTitle << "." << endl;
+    out << "This conference is expected to have " << conference.expectedAtendees << " attendants." << endl;
+    out << "This conference will last " << conference.duration << " hours." << endl;
+    out << "The company hosting the conference is called " << conference.hostingCompany << "." << endl;
+    out << "It will be hosted by the " << conference.hostNo << " hosts of " << conference.hostingCompany << ". Their names are: " << endl;
+    for (int i = 1; i <= conference.hostNo; i++) {
+        out << i << ". " << conference.hostNames[i - 1] << endl;
+    }
+
+    return out;
+}
+
+istream& operator >>(istream& in, Conference& conference) {
+
+    cout << "What is this conference's title: ";
+    in >> conference.conferenceTitle;
+
+    cout << "How many attendants do you expect: ";
+    in >> conference.expectedAtendees;
+
+    cout << "How long do you think this conference will last: ";
+    in >> conference.duration;
+
+    cout << "What is the name of the hosting company: ";
+    in >> conference.hostingCompany;
+
+    cout << "How many hosts will this conference have: ";
+    in >> conference.hostNo;
+
+    for (int i = 1; i <= conference.hostNo; i++) {
+        cout << "Enter the name of host " << i << ": ";
+        string aux;
+        in >> aux;
+        conference.hostNames.push_back(aux);
+    }
+
+    return in;
+}
+
+Conference& Conference::operator=(const Conference& conference) {
+    if (this != &conference) {
+        this->expectedAtendees = conference.expectedAtendees;
+        this->duration = conference.duration;
+        this->conferenceTitle = conference.conferenceTitle;
+        this->hostingCompany = conference.hostingCompany;
+        this->hostNo = conference.hostNo;
+        this->hostNames = conference.hostNames;
+    }
+    return *this;
+}
 
 class Calendar {
 private:
@@ -450,11 +539,11 @@ public:
     int* getDates() { return this->dates; };
 
     // setters 
-    void setCalendarName() { this->calendarName; };
-    void setEventTypee() { this->eventType; };
-    void setMonth() { this->month; };
-    void setnoOfDays() { this->noOfDays; };
-    void setDates(); // TODO implement this
+    void setCalendarName(string calendarNamecalendarName) { this->calendarName = calendarName; };
+    void setEventTypee(string eventType) { this->eventType = eventType; };
+    void setMonth(string month) { this->month = month; };
+    void setnoOfDays(int noOfDays) { this->noOfDays = noOfDays; };
+    void setDates(int dates[]);
 
     Calendar(); // empty constructor
     ~Calendar(); // destructor
@@ -465,13 +554,49 @@ public:
     Calendar& operator=(const Calendar& calendar); // = overload
 };
 
-//Calendar(); // empty constructor
-//~Calendar(); // destructor
-//Calendar(string calendarName, string eventType, string month, int noOfDays, int* dates); // full constructor
-//Calendar(const Calendar& calendar); // copy constructor
-//friend ostream& operator <<(ostream& out, const Calendar& calendar); // output operator overload
-//friend istream& operator >>(istream& in, Calendar& calendar); // input operator overload
-//Calendar& operator=(const Calendar& calendar); // = overload
+void Calendar::setDates(int dates[]) {
+    if (this->dates != NULL) {
+        delete[] this->dates;
+    }
+
+    this->dates = new int[sizeof(dates)];
+    for (int i = 0; i < sizeof(dates); i++) {
+        this->dates[i] = dates[i];
+    }
+}
+
+int Calendar::countCalendar = 10000;
+
+Calendar::Calendar():calendarID(countCalendar++) {
+    
+}
+
+Calendar::~Calendar() {
+    delete[] this->dates;
+}
+
+
+Calendar::Calendar(string calendarName, string eventType, string month, int noOfDays, int* dates):calendarID(countCalendar++) {
+
+}
+
+
+Calendar::Calendar(const Calendar& calendar) :calendarID(countCalendar++){
+
+}
+
+ostream& operator <<(ostream& out, const Calendar& calendar) {
+
+}
+
+istream& operator >>(istream& in, Calendar& calendar){
+
+}
+
+Calendar& Calendar::operator=(const Calendar& calendar){
+
+}
+
 
 int main() {
 
