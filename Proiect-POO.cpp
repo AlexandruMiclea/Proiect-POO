@@ -325,7 +325,7 @@ EventRoom::EventRoom():roomNo(roomCnt++){
     this->facilities.push_back("");
         
 }
-//~EventRoom(); // destructor
+EventRoom::~EventRoom(){} // destructor
 
 EventRoom::EventRoom(string roomName, int seatNo, char pavilion, int noOfFacilities, vector <string> facilities) :roomNo(roomCnt++) {
     this->roomName = roomName;
@@ -444,7 +444,7 @@ Conference::Conference():conferenceID(countConference++) {
     this->hostNo = 0;
     this->hostNames.push_back("");
 }
-//~Conference(); // destructor
+Conference::~Conference(){} // destructor
 
 Conference::Conference(int expectedAtendees, float duration, string conferenceTitle, string hostingCompany, int hostNo, vector <string> hostNames) :conferenceID(countConference++) {
     this->expectedAtendees = expectedAtendees;
@@ -568,7 +568,11 @@ void Calendar::setDates(int dates[]) {
 int Calendar::countCalendar = 10000;
 
 Calendar::Calendar():calendarID(countCalendar++) {
-    
+    this->calendarName = "New Calendar";
+    this->eventType = "Unassigned";
+    this->month = "Unassigned";
+    this->noOfDays = 0;
+    this->dates = new int(0);
 }
 
 Calendar::~Calendar() {
@@ -577,58 +581,106 @@ Calendar::~Calendar() {
 
 
 Calendar::Calendar(string calendarName, string eventType, string month, int noOfDays, int* dates):calendarID(countCalendar++) {
+    this->calendarName = calendarName;
+    this->eventType = eventType;
+    this->month = month;
+    this->noOfDays = noOfDays;
+    
+    if (this->dates != NULL) {
+        delete[] this->dates;
+    }
 
+    this->dates = new int[sizeof(dates)];
+    for (int i = 0; i < sizeof(dates); i++) {
+        this->dates[i] = dates[i];
+    }
 }
 
 
 Calendar::Calendar(const Calendar& calendar) :calendarID(countCalendar++){
+    this->calendarName = calendar.calendarName;
+    this->eventType = calendar.eventType;
+    this->month = calendar.month;
+    this->noOfDays = calendar.noOfDays;
 
+    if (this->dates != NULL) {
+        delete[] this->dates;
+    }
+
+    this->dates = new int[sizeof(calendar.dates)];
+    for (int i = 0; i < sizeof(calendar.dates); i++) {
+        this->dates[i] = calendar.dates[i];
+    }
 }
 
 ostream& operator <<(ostream& out, const Calendar& calendar) {
+    
+    out << "This calendar is called " << calendar.calendarName << "." << endl;
+    out << "The type of event it tracks is" << calendar.eventType << "." << endl;
+    out << "The event takes place in the month of " << calendar.month << ", across " << calendar.noOfDays << "." << endl;
+    out << "The days in which the event takes place are: " << endl;
+    for (int i = 1; i <= calendar.noOfDays; i++) {
+        out << calendar.dates[i - 1] << ", ";
+    }
 
+    return out;
 }
 
 istream& operator >>(istream& in, Calendar& calendar){
 
+    cout << "Enter calendar name: ";
+    in >> calendar.calendarName;
+
+    cout << "Enter event type: ";
+    in >> calendar.eventType;
+
+    cout << "Enter the month in which the event takes place: ";
+    in >> calendar.month;
+
+    cout << "How many days will the event span: ";
+    in >> calendar.noOfDays;
+
+    if (calendar.dates != NULL) {
+        delete[] calendar.dates;
+        calendar.dates = NULL;
+    }
+
+    calendar.dates = new int[calendar.noOfDays];
+
+    cout << "Enter the days the event will take place: " << endl;
+    for (int i = 1; i <= calendar.noOfDays; i++) {
+        cout << "Day " << i << ": ";
+        in >> calendar.dates[i-1];
+    }
+
+    return in;
 }
 
 Calendar& Calendar::operator=(const Calendar& calendar){
+    
+    if (this != &calendar) {
+        this->calendarName = calendar.calendarName;
+        this->eventType = calendar.eventType;
+        this->month = calendar.month;
+        this->noOfDays = calendar.noOfDays;
 
+        if (this->dates != NULL) {
+            delete[] this->dates;
+        }
+
+        this->dates = new int[sizeof(calendar.dates)];
+        for (int i = 0; i < sizeof(calendar.dates); i++) {
+            this->dates[i] = calendar.dates[i];
+        }
+    }
+    
+    return *this;
 }
 
 
 int main() {
 
-    /*Event a1;
-    cout << a1.getConferenceNo();
-    cout << a1.getEventID();
-    cout << a1.getEventName();
-
-    char nume[] = "Dansul lambada in 5 pasi simpli.";
-
-    Event a2(5,3,2.5,nume,"Ana danseaza lambada");
-    cout << a2.getEventName() << endl;
-    cout << a2.getHostName() << endl;
-
-    Event a3(a2), a4 = a2;
-
-    cout << a3.getEventName() << endl << endl;
-    cout << a4.getHostName() << endl;
-
-    cin >> a3;
-    cout << a3;*/
-
-    Company c1;
-    cout << c1.getCompanyName();
-
-    vector <string> aux;
-    aux.push_back("Copac");
-    aux.push_back("Masina Zdrobita");
-    aux.push_back("Securist ramas prin zona (se asigura ca moare ceo-ul).");
-
-    Company c2(true, "HexiPharma",3,aux);
-    cout << c2;
+    
 
     return 0;
 }
