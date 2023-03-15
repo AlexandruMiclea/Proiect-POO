@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 #pragma warning (disable : 4996)
@@ -16,11 +17,18 @@ private:
     const int eventID;
     static int countEvent;
 
+    // own variables
     int expectedAtendees;
     int conferenceNo;
     float span;
     char* eventName;
     string hostName;
+
+    // class variables
+    Conference* conferences[5];
+    Company* companies[5];
+    EventRoom* eventRooms[5];
+    Calendar* eventCalendar;
 
 public:
 
@@ -680,7 +688,96 @@ Calendar& Calendar::operator=(const Calendar& calendar){
 
 int main() {
 
-    
 
+    cout << "Welcome to event planner v0.31rc4" << endl;
+    cout << "At any time you can quit by typing (quit)." << endl;
+    cout << "The instruction to be used is written between round braces, as in the following example: (your_command_here)." << endl << endl;
+
+    cout << "Please enter one of the following instructions to begin: " << endl;
+    cout << "1. Create event (create_event);" << endl;
+    cout << "2. Create company (create_company);" << endl;
+    cout << "3. Create event room (create_eventroom);" << endl;
+    cout << "4. Create conference (create_conference);" << endl;
+    cout << "5. Create calendar (create_calendar);" << endl;
+    cout << "6. Continue to data printing (continue)" << endl;
+    string input = "";
+
+    // TODO cum aloc dinamic crearea de clase?
+    Event* Events = new Event[10];
+    Company* Companies = new Company[10];
+    EventRoom* EventRooms = new EventRoom[10];
+    Conference* Conferences = new Conference[10];
+    Calendar* Calendars = new Calendar[10];
+
+    cin >> input;
+    std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+    while (input != "quit") {
+        
+        if (input == "create") {
+            while (input != "continue") {
+                // TODO o fi bine sa am valori constante aici?
+                if (input == "create_event") {
+                    const int ptr = Events->getEventID();
+                    cin >> Events[ptr - 10];
+                }
+                else if (input == "create_company") {
+                    const int ptr = Companies->getCompanyID();
+                    cin >> Companies[ptr - 100];
+                }
+                else if (input == "create_eventroom") {
+                    const int ptr = EventRooms->getRoomNo();
+                    cin >> EventRooms[ptr - 200];
+                }
+                else if (input == "create_conference") {
+                    const int ptr = Conferences->getConferenceID();
+                    cin >> Conferences[ptr - 1000];
+                }
+                else if (input == "create_calendar") {
+                    const int ptr = Calendars->getCalendarID();
+                    cin >> Calendars[ptr - 10000];
+                }
+            }
+        }
+        else if (input == "read") {
+            while (input != "continue") {
+                input = "";
+
+                cout << "Next, you can " << endl << endl;
+
+                cout << "Please enter one of the following instructions to begin: " << endl;
+                cout << "1. Create event (create_event);" << endl;
+                cout << "2. Create company (create_company);" << endl;
+                cout << "3. Create event room (create_eventroom);" << endl;
+                cout << "4. Create conference (create_conference);" << endl;
+                cout << "5. Create calendar (create_calendar);" << endl;
+                cout << "6. Continue to data printing (continue)" << endl;
+
+                while (input != "continue") {
+                    cout << "hello!";
+
+                    cin >> input;
+                    std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+                }
+            }
+        }
+        else if (input == "update") {
+            while (input != "continue") {
+
+            }
+        }
+        else if (input == "delete") {
+            while (input != "continue") {
+
+            }
+        }
+        else {
+            cout << "Unknown command! Please try again!" << endl;
+        }
+
+        cin >> input;
+        std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+    }
+    
+    cout << "Thank you for using our app!" << endl;
     return 0;
 }
