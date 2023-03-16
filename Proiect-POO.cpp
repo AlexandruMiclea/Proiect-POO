@@ -22,7 +22,7 @@ class Conference;
 
 
 // TODO Event
-// +-, <, ==
+// +-, <
 
 class Event {
 private:
@@ -85,6 +85,7 @@ public:
     operator string(); // string cast
     Event& operator++(); // prefix overload
     Event operator++(int); // postfix overload
+    bool operator==(const Event&); // == overload
 };
 
 int Event::countEvent = 10;
@@ -250,6 +251,11 @@ Event Event::operator++(int) {
 }
 
 
+// == overload
+bool Event::operator==(const Event& event) {
+    return this->eventName == event.eventName;
+}
+
 
 
 
@@ -262,7 +268,7 @@ Event Event::operator++(int) {
 
 
 // TODO Company
-// [], ++ (2), +-, cast, <, ==
+// +-, <
 
 
 class Company {
@@ -298,6 +304,10 @@ public:
     friend ostream& operator <<(ostream& out, const Company& Company); // output operator overload
     friend istream& operator >>(istream& in, Company& Company); // input operator overload
     Company& operator=(const Company& Company); // = overload
+    string operator[](int);
+    bool operator==(const Company&);
+    Company operator+(int);
+    Company& operator+();
 
     operator string(); // string cast
 
@@ -392,9 +402,37 @@ Company::operator string() {
         aux += this->companyName + " ";
         aux += "and it is ";
         aux += (hosting ? "" : "NOT ");
-        aux += "expected to host a conference."
+        aux += "expected to host a conference.";
         return aux;
     }
+}
+
+
+string Company::operator[](int x) {
+    if (this->representatives.empty()) {
+        throw runtime_error("No hosts have been named yet!");
+    }
+    if (x < 0 || x >= this->representativeNo) {
+        throw runtime_error("Invalid index!");
+    }
+
+    return this->representatives[x];
+}
+
+bool Company::operator==(const Company& company) {
+    return this->companyName == company.companyName;
+}
+
+Company Company::operator+(int) {
+    Company aux(*this);
+    this->representativeNo++;
+    return aux;
+}
+
+
+Company& Company::operator+() {
+    this->representativeNo++;
+    return *this;
 }
 
 
@@ -409,13 +447,8 @@ Company::operator string() {
 
 
 
-
-
-
-
-
 // TODO EventRoom
-// [], ++ (2), +-, cast, <, ==
+// +-, <
 
 
 class EventRoom {
@@ -457,7 +490,10 @@ public:
     friend ostream& operator <<(ostream& out, const EventRoom& eventRoom); // output operator overload
     friend istream& operator >>(istream& in, EventRoom& eventRoom); // input operator overload
     EventRoom& operator=(const EventRoom& eventRoom); // = overload
-
+    string operator[](int); // index overload 
+    bool operator==(const EventRoom&); // == overload
+    EventRoom operator++(int); // postfix operator
+    EventRoom& operator++(); // prefix operator
     operator string(); // string cast
 
 };
@@ -552,10 +588,33 @@ EventRoom::operator string() {
     }
 }
 
+string EventRoom::operator[](int x) {
+    if (this->facilities.empty()) {
+        throw runtime_error("No hosts have been named yet!");
+    }
+    if (x < 0 || x >= this->noOfFacilities) {
+        throw runtime_error("Invalid index!");
+    }
+
+    return this->facilities[x];
+}
 
 
+bool EventRoom::operator==(const EventRoom& eventRoom) {
+    return this->roomName == eventRoom.roomName;
+}
+
+EventRoom EventRoom::operator++(int) {
+    EventRoom aux(*this);
+    this->seatNo++;
+    return aux;
+}
 
 
+EventRoom& EventRoom::operator++() {
+    this->seatNo++;
+    return *this;
+}
 
 
 
@@ -571,7 +630,7 @@ EventRoom::operator string() {
 
 
 // TODO Conference
-// [], ++ (2), +-, cast, < , ==
+//  +-, <
 
 
 
@@ -616,7 +675,10 @@ public:
     friend istream& operator >>(istream& in, Conference& conference); // input operator overload
     Conference& operator=(const Conference& conference); // = overload
     bool operator==(const Conference&); // == overload
-    operator string(); // string cast
+    operator string(); // string cast overload
+    string operator[](int); // index overload 
+    Conference& operator++(); // prefix overload
+    Conference operator++(int); // postfix overload
 
 };
 
@@ -733,7 +795,33 @@ Conference::operator string() {
 
 // == overload
 bool Conference::operator==(const Conference& conference) {
+    return this->conferenceTitle == conference.conferenceTitle;
+}
 
+// [] overload
+string Conference::operator[](int x) {
+    if (this->hostNames.empty()) {
+        throw runtime_error("No hosts have been named yet!");
+    }
+    if (x < 0 || x >= this->hostNo) {
+        throw runtime_error("Invalid index!");
+    }
+
+    return this->hostNames[x];
+}
+
+
+// prefix overload
+Conference& Conference::operator++() {
+    this->duration++;
+    return *this;
+}
+
+// postfix overload
+Conference Conference::operator++(int) {
+    Conference aux(*this);
+    this->duration++;
+    return aux;
 }
 
 
@@ -751,8 +839,9 @@ bool Conference::operator==(const Conference& conference) {
 
 
 
+
 // TODO Calendar
-// + -, < (mai devreme fata de alt calendar)
+// +-, < (mai devreme fata de alt calendar)
 
 
 
