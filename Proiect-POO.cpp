@@ -22,7 +22,7 @@ class Conference;
 
 
 // TODO Company
-// +-
+// -, partial constructors
 
 
 class Company {
@@ -59,13 +59,14 @@ public:
     friend ostream& operator <<(ostream& out, const Company& Company); // output operator overload
     friend istream& operator >>(istream& in, Company& Company); // input operator overload
     Company& operator=(const Company& Company); // = overload
-    string operator[](int); // cast overload
+    string operator[](int); // index overload
     bool operator==(const Company&); // == overload
     bool operator<(const Company&); // < overload
     Company operator++(int); // postfix overload
     Company& operator++(); // prefix overload
     Company operator+(Company); // + overload  
-    Company operator-(Company); // - overload 
+    Company* operator*(int);
+    friend Company* operator*(int, Company);
 
 
 
@@ -199,16 +200,31 @@ bool Company::operator<(const Company& company) {
     return this->representativeNo < company.representativeNo;
 }
 
-//// + overload 
-//Company operator+(Company) {
-//
-//}
-//
-//// - overload 
-//Company operator-(Company) {
-//
-//}
+// + overload 
+Company Company::operator+(Company company) {
+    Company ans(*this);
+    ans.representativeNo += company.representativeNo;
+    for (auto& str : company.representatives) {
+        ans.representatives.push_back(str);
+    }
+    return ans;
+}
 
+Company* Company::operator*(int x) {
+    Company* ans = new Company[x];
+    for (int i = 0; i < x; i++) {
+        ans[i] = *this;
+    }
+    return ans;
+}
+
+Company* operator*(int x, Company company) {
+    Company* ans = new Company[x];
+    for (int i = 0; i < x; i++) {
+        ans[i] = company;
+    }
+    return ans;
+}
 
 
 
@@ -252,7 +268,7 @@ bool Company::operator<(const Company& company) {
 
 
 // TODO EventRoom
-// +-
+// +-, partial constructors
 
 
 class EventRoom {
@@ -441,8 +457,35 @@ bool EventRoom::operator<(const EventRoom& eventRoom) {
 
 
 
-// TODO Conference
-//  +-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -483,6 +526,8 @@ public:
     ~Conference(); // destructor
     Conference(int expectedAtendees, float duration, string conferenceTitle, Company* hostingCompany, int hostNo, vector <string> hostNames); // full constructor
     Conference(const Conference& conference); // copy constructor
+    Conference(int expectedAtendees, float duration, string conferenceTitle, int hostNo, vector <string> hostNames); // constructor without assigned company
+    Conference(string conferenceTitle); // title conference constructor
     friend ostream& operator <<(ostream& out, const Conference& conference); // output operator overload
     friend istream& operator >>(istream& in, Conference& conference); // input operator overload
     Conference& operator=(const Conference& conference); // = overload
@@ -492,27 +537,30 @@ public:
     string operator[](int); // index overload 
     Conference& operator++(); // prefix overload
     Conference operator++(int); // postfix overload
-    Conference operator+(int); // + overload  
-    Conference operator-(int); // - overload 
-
-    // Addition and subtraction between Conference and Event
-    Conference operator+(Event*); // + overload  
-    Conference operator-(Event*); // - overload 
+    Conference operator+(string); // + overload  
+    Conference operator-(string); // - overload 
+    friend Conference operator+(string, Conference); // + commutative
+    friend Conference operator-(string, Conference); // - commutative
+    Conference operator+(const Conference&);
 
 };
 
 int Conference::countConference = 1000;
 
+// empty constructor
 Conference::Conference():conferenceID(countConference++) {
     this->expectedAtendees = 0;
     this->duration = 0.0f;
     this->conferenceTitle = "New Conference";
     this->hostingCompany = NULL;
     this->hostNo = 0;
-    this->hostNames.push_back("");
 }
-Conference::~Conference(){} // destructor
+// destructor
+Conference::~Conference(){
+    this->hostNames.clear();
+}
 
+// full constructor
 Conference::Conference(int expectedAtendees, float duration, string conferenceTitle, Company* hostingCompany, int hostNo, vector <string> hostNames) :conferenceID(countConference++) {
     this->expectedAtendees = expectedAtendees;
     this->duration = duration;
@@ -522,6 +570,7 @@ Conference::Conference(int expectedAtendees, float duration, string conferenceTi
     this->hostNames = hostNames;
 }
 
+// copy constructor
 Conference::Conference(const Conference& conference) :conferenceID(countConference++) {
     this->expectedAtendees = conference.expectedAtendees;
     this->duration = conference.duration;
@@ -530,13 +579,14 @@ Conference::Conference(const Conference& conference) :conferenceID(countConferen
     this->hostNo = conference.hostNo;
     this->hostNames = conference.hostNames;
 }
+
+// << overload
 ostream& operator <<(ostream& out, const Conference& conference) {
 
     out << "The conference's title is " << conference.conferenceTitle << "." << endl;
     out << "This conference is expected to have " << conference.expectedAtendees << " attendants." << endl;
     out << "This conference will last " << conference.duration << " hours." << endl;
-    out << "The company hosting the conference is called " << conference.hostingCompany << "." << endl;
-    out << "It will be hosted by the " << conference.hostNo << " hosts of " << conference.hostingCompany << ". Their names are: " << endl;
+    out << "It will be hosted by the " << conference.hostNo << " hosts of " << conference.hostingCompany->getCompanyName() << ". Their names are: " << endl;
     for (int i = 1; i <= conference.hostNo; i++) {
         out << i << ". " << conference.hostNames[i - 1] << endl;
     }
@@ -544,6 +594,7 @@ ostream& operator <<(ostream& out, const Conference& conference) {
     return out;
 }
 
+// >> overload
 istream& operator >>(istream& in, Conference& conference) {
 
     cout << "What is this conference's title: ";
@@ -594,24 +645,13 @@ Conference::operator string() {
     return "This conference does not have hosts assigned yet!";
     }
     else {
-        string aux = "This event is called ";
-        aux += this->conferenceTitle + " ";
-        aux += "and is brought to you by ";
-        aux += this->hostingCompany->getCompanyName() + ". ";
-        aux += "It will be hosted by the following company representatives: ";
-        for (int i = 0; i < this->hostNo - 1; i++) {
-            aux += hostNames[i];
-            aux += ", ";
-        }
-        aux += this->hostNames[this->hostNo - 1] + ".";
-        return aux;
+        return this->hostingCompany->getCompanyName();
     }
 }
 
-
 // == overload
 bool Conference::operator==(const Conference& conference) {
-    return this->conferenceTitle == conference.conferenceTitle;
+    return (this->conferenceTitle == conference.conferenceTitle) && (this->hostingCompany->getCompanyName() == conference.hostingCompany->getCompanyName());
 }
 
 // [] overload
@@ -640,21 +680,109 @@ Conference Conference::operator++(int) {
     return aux;
 }
 
+// < overload
 bool Conference::operator<(const Conference& conference) {
     return this->expectedAtendees < conference.expectedAtendees;
 }
 
 
+// + overload  
+// TODO test
+Conference Conference::operator+(string representative) {
+    this->hostNo++;
+    this->hostNames.push_back(representative);
+    return *this;
+}
 
-//// Addition and subtraction between Conference and Event
-//// + overload  
-//Conference Conference::operator+(Event*) {
-//
-//}
-//// - overload 
-//Conference Conference::operator-(Event*) {
-//
-//}
+// - overload 
+// TODO test
+Conference Conference::operator-(string representative) {
+    vector <string> auxx;
+    for (auto& rep : this->hostNames) {
+        if (rep != representative) {
+            auxx.push_back(rep);
+        }
+        else {
+            this->hostNo--;
+        }
+    }
+    this->hostNames = auxx;
+    return *this;
+}
+
+// string + conference
+Conference operator+(string str, Conference conference){
+    for (auto& name : conference.hostNames) {
+        if (str == name) {
+            return conference;
+        }
+    }
+    conference.hostNo++;
+    conference.hostNames.push_back(str);
+    return conference;
+}
+
+Conference operator-(string str, Conference conference){
+    for (int i = 0; i < conference.hostNo; i++) {
+        if (str == conference.hostNames[i]) {
+            conference.hostNames.erase(conference.hostNames.begin() + i);
+            i--;
+            conference.hostNo--;
+        }
+    }
+    return conference;
+}
+
+// addition between two of the same
+Conference Conference::operator+(const Conference& conference) {
+    Conference ans(*this);
+    // illegal action, just return the first operator
+    if (ans == conference) {
+        // add the two representative teams
+        for (auto& rep : conference.hostNames) {
+            ans.hostNames.push_back(rep);
+        }
+        ans.expectedAtendees += conference.expectedAtendees;
+        ans.hostNo += conference.hostNo;
+
+        return ans;
+    }
+    else {
+        throw runtime_error("Two different conferences should not be added together!");
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -667,7 +795,7 @@ bool Conference::operator<(const Conference& conference) {
 
 
 // TODO Calendar
-// +-, 
+// +-,  partial constructors
 
 
 
@@ -1004,6 +1132,34 @@ bool Calendar::operator<(const Calendar& calendar) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // TODO TEST
 class Event {
 private:
@@ -1070,9 +1226,13 @@ public:
     void createEvent(Company*, Company*, EventRoom*, Calendar*, Conference*); // class function
     bool operator<(const Event&); // < overload
 
-    // Adding and subtracting a conference to an event
-    Event operator+(Conference*); // + overload  
-    Event operator-(Conference*); // - overload 
+    // Adding and subtracting between Event and Conference
+    Event operator+(const Conference&); // + overload  
+    Event operator-(const Conference&); // - overload 
+
+    // Addition and subtraction between Conference and Event
+    friend Event operator+(Conference, Event); // + overload  
+    friend Event operator-(Conference, Event); // - overload 
 
     Event operator+(Event*); // + overload  
     Event operator-(Event*); // - overload 
@@ -1168,12 +1328,18 @@ Event::~Event() {
 }
 
 // full constructor
-Event::Event(int expectedAtendees, int conferenceNo, float span, char* eventName) :eventID(countEvent++) {
+Event::Event(int expectedAtendees, int conferenceNo, float span, char* eventName):eventID(countEvent++) {
     this->expectedAtendees = expectedAtendees;
     this->conferenceNo = conferenceNo;
     this->span = span;
     this->eventName = new char[strlen(eventName) + 1];
     strcpy(this->eventName, eventName);
+
+    this->hostCompany = new Company[1];
+    this->attendingCompanies = new Company[20];
+    this->eventRooms = new EventRoom[50];
+    this->calendar = new Calendar[1];
+    this->conferences = new Conference[80];
 }
 
 // copy constructor
@@ -1238,10 +1404,10 @@ istream& operator>>(istream& in, Event& event) {
 // overload output
 ostream& operator<<(ostream& out, const Event& event) {
     out << "This event is expected to have " << event.expectedAtendees << " attendants." << endl;
-    out << "This event will have a numer of " << event.countEvent << " events." << endl;
+    out << "This event will have a numer of " << event.conferenceNo << " conferences." << endl;
     out << "The event is expected to last a number of " << event.span << " days." << endl;
     out << "The event is called " << event.eventName << "." << endl;
-    out << "The event is hosted by " << event.hostCompany->getCompanyName() << "." << endl;
+    //out << "The event is hosted by " << event.hostCompany->getCompanyName() << "." << endl;
 
     out << endl;
     return out;
@@ -1324,9 +1490,9 @@ bool Event::operator<(const Event& event) {
 
 // Event + Conference
 // TODO debug
-Event Event::operator+(Conference* conference) {
+Event Event::operator+(const Conference& conference) {
     for (int i = 0; i < this->conferenceNo; i++) {
-        if (this->conferences[i] == *conference) {
+        if (this->conferences[i] == conference) {
             throw runtime_error("This conference is already in this event!");
         }
     }
@@ -1339,27 +1505,27 @@ Event Event::operator+(Conference* conference) {
     for (int i = 0; i < this->conferenceNo - 1; i++) {
         this->conferences[i] = aux[i];
     }
-    this->conferences[this->conferenceNo - 1] = *conference;
+    this->conferences[this->conferenceNo - 1] = conference;
 
     return *this;
 }
 
 // Event - Conference
 // TODO debug
-Event Event::operator-(Conference* conference) {
+Event Event::operator-(const Conference& conference) {
     Conference* aux = new Conference[this->conferenceNo - 1];
     int ptr = 0;
     int ok = 0;
 
     for (int i = 0; i < this->conferenceNo; i++) {
-        if (this->conferences[i] == *conference) {
+        if (this->conferences[i] == conference) {
             ok = 1;
             break;
         }
     }
     if (ok) {
         for (int i = 0; i < this->conferenceNo; i++) {
-            if (this->conferences[i] == *conference) {
+            if (this->conferences[i] == conference) {
                 continue;
             }
             else {
@@ -1402,6 +1568,87 @@ Event Event::operator-(Event* event) {
     return *this;
 }
 
+//// Addition and subtraction between Conference and Event
+//
+//// + overload 
+//Event Conference::operator+(Event& event) {
+//
+//    for (int i = 0; i < event; i++) {
+//        if (this->conferences[i] == conference) {
+//            throw runtime_error("This conference is already in this event!");
+//        }
+//    }
+//    Conference* aux = new Conference[this->conferenceNo];
+//    for (int i = 0; i < this->conferenceNo; i++) {
+//        aux[i] = this->conferences[i];
+//    }
+//    delete[] this->conferences;
+//    this->conferences = new Conference[++this->conferenceNo];
+//    for (int i = 0; i < this->conferenceNo - 1; i++) {
+//        this->conferences[i] = aux[i];
+//    }
+//    this->conferences[this->conferenceNo - 1] = conference;
+//
+//    return *this;
+//}
+//
+//// - overload 
+//Event Event::operator-(Event* event) {
+//    Conference* aux = new Conference[this->conferenceNo - 1];
+//    int ptr = 0;
+//    int ok = 0;
+//
+//    for (int i = 0; i < this->conferenceNo; i++) {
+//        if (this->conferences[i] == conference) {
+//            ok = 1;
+//            break;
+//        }
+//    }
+//    if (ok) {
+//        for (int i = 0; i < this->conferenceNo; i++) {
+//            if (this->conferences[i] == conference) {
+//                continue;
+//            }
+//            else {
+//                aux[ptr++] = this->conferences[i];
+//            }
+//        }
+//        delete[] this->conferences;
+//        this->conferences = new Conference[--this->conferenceNo];
+//        for (int i = 0; i < this->conferenceNo - 1; i++) {
+//            this->conferences[i] = aux[i];
+//        }
+//
+//        return *this;
+//    }
+//    else {
+//        throw runtime_error("This conference does not exist in the event!");
+//    }
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1412,6 +1659,39 @@ Event Event::operator-(Event* event) {
 
 
 int main() {
+
+    // (bool hosting, string companyName, int representativeNo, vector <string> representatives)
+    Company c1(false,"Armada",3,{"Daniel","Petru","Alexandru"});
+    Company c2(true,"QuikSolv",2,{"Dana","Damian"});
+    Company c3(true,"TerBonna",5,{"Cristian","Eduard","Flavia", "Fabiana", "Emma"});
+    //cout << c1 << c2 << c3;
+
+    // la conference string cast nu are sens!
+    
+    // int expectedAtendees, float duration, string conferenceTitle, Company* hostingCompany, int hostNo, vector <string> hostNames)
+    Conference co1(25,3.5,"Programare etica",&c3,2,{"Cristian", "Fabiana"});
+    Conference co3(25,3.5,"Programare etica",&c3,2,{"Eduard", "Emma"});
+    Conference co2(40, 2, "E-Government", &c2, 2, {"Dana", "Damian"});
+
+    /*cout << co1;
+    co1 = co1 + "Ioana";
+    cout << co1;
+    co1 = co1 - "Cristian";
+    cout << co1;*/
+
+    /*cout << co2;
+    co2 = "Iulian" + co2;
+    cout << co2;
+    co2 = "Dana" - co2;
+    cout << co2;*/
+    cout << (co1 + co3);
+    
+
+
+    /*Conference c1, c2;
+    Event e1;
+    e1 = e1 + c1;
+    cout << e1;*/
 
     //cout << "Welcome to event planner v0.31rc4" << endl;
     //cout << "At any time you can quit by typing (quit)." << endl;
