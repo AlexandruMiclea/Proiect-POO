@@ -22,7 +22,7 @@ class Conference;
 
 
 // TODO Company
-// -, partial constructors
+// partial constructors, functionality
 
 
 class Company {
@@ -65,11 +65,8 @@ public:
     Company operator++(int); // postfix overload
     Company& operator++(); // prefix overload
     Company operator+(Company); // + overload  
-    Company* operator*(int);
-    friend Company* operator*(int, Company);
-
-
-
+    Company* operator*(int); // *overload
+    friend Company* operator*(int, Company); // * overload
     operator string(); // string cast
 
 };
@@ -84,7 +81,7 @@ Company::Company() :companyID(countID++) {
 }
 
 Company::~Company() {
-    // destructor, need to find a use for it
+    this->representatives.clear();
 }
 
 Company::Company(bool hosting, string companyName, int representativeNo, vector <string> representatives) :companyID(countID++) {
@@ -268,7 +265,7 @@ Company* operator*(int x, Company company) {
 
 
 // TODO EventRoom
-// +-, partial constructors
+// functionality
 
 
 class EventRoom {
@@ -296,7 +293,6 @@ public:
     vector <string> getFacilities() { return this->facilities;};
 
     // setters 
-    // TODO see if getRoomNo can be accessed
     void setRoomName(string roomName) { this->roomName = roomName; };
     void setSeatNo(int seatNo) { this->seatNo = seatNo; };
     void setPavilion(char pavilion) { this->pavilion = pavilion; };
@@ -306,6 +302,8 @@ public:
     EventRoom(); // empty constructor
     ~EventRoom(); // destructor
     EventRoom(string roomName, int seatNo, char pavilion, int noOfFacilities, vector <string> facilities); // full constructor
+    EventRoom(string roomName, int seatNo, char pavilion); // partial constructor 1
+    EventRoom(string roomName); // partial constructor 2
     EventRoom(const EventRoom& event); // copy constructor
     friend ostream& operator <<(ostream& out, const EventRoom& eventRoom); // output operator overload
     friend istream& operator >>(istream& in, EventRoom& eventRoom); // input operator overload
@@ -330,11 +328,30 @@ EventRoom::EventRoom():roomNo(roomCnt++){
     this->seatNo = 0;
     this->pavilion = 'X';
     this->noOfFacilities = 0;
-    this->facilities.push_back("");
-        
 }
-EventRoom::~EventRoom(){} // destructor
 
+// partial constructor 1
+EventRoom::EventRoom(string roomName, int seatNo, char pavilion) :roomNo(roomCnt++) {
+    this->roomName = roomName;
+    this->seatNo = seatNo;
+    this->pavilion = pavilion;
+    this->noOfFacilities = 0;
+}
+
+// partial constructor 2
+EventRoom::EventRoom(string roomName) :roomNo(roomCnt++) {
+    this->roomName = roomName;
+    this->seatNo = 0;
+    this->pavilion = 'X';
+    this->noOfFacilities = 0;
+}
+
+// destructor
+EventRoom::~EventRoom(){
+    facilities.clear();
+}
+
+// full constructor
 EventRoom::EventRoom(string roomName, int seatNo, char pavilion, int noOfFacilities, vector <string> facilities) :roomNo(roomCnt++) {
     this->roomName = roomName;
     this->seatNo = seatNo;
@@ -342,6 +359,8 @@ EventRoom::EventRoom(string roomName, int seatNo, char pavilion, int noOfFacilit
     this->noOfFacilities = noOfFacilities;
     this->facilities = facilities;
 }
+
+// copy constructor
 EventRoom::EventRoom(const EventRoom& eventRoom) :roomNo(roomCnt++) {
     this->roomName = eventRoom.roomName;
     this->seatNo = eventRoom.seatNo;
@@ -349,6 +368,8 @@ EventRoom::EventRoom(const EventRoom& eventRoom) :roomNo(roomCnt++) {
     this->noOfFacilities = eventRoom.noOfFacilities;
     this->facilities = eventRoom.facilities;
 }
+
+// output overload
 ostream& operator <<(ostream& out, const EventRoom& eventRoom) {
 
     out << "This room's name is " << eventRoom.roomName << "." << endl;
@@ -362,6 +383,7 @@ ostream& operator <<(ostream& out, const EventRoom& eventRoom) {
     return out;
 }
 
+// input overload
 istream& operator >>(istream& in, EventRoom& eventRoom) {
 
     cout << "What is this room's name: ";
@@ -445,7 +467,33 @@ bool EventRoom::operator<(const EventRoom& eventRoom) {
     return this->seatNo < eventRoom.seatNo;
 }
 
+// + overload
+EventRoom EventRoom::operator+(int newSeats){
+    EventRoom aux(*this);
+    aux.seatNo += newSeats;
+    return aux;
+}
 
+// - overload 
+EventRoom EventRoom::operator-(int newSeats) {
+    EventRoom aux(*this);
+    aux.seatNo -= newSeats;
+    return aux;
+}
+
+// comutative -
+EventRoom operator-(int newSeats, EventRoom eventRoom) {
+    EventRoom aux(eventRoom);
+    aux.seatNo -= newSeats;
+    return aux;
+}
+
+// comutative +
+EventRoom operator+(int newSeats, EventRoom eventRoom) {
+    EventRoom aux(eventRoom);
+    aux.seatNo += newSeats;
+    return aux;
+}
 
 
 
@@ -515,19 +563,19 @@ public:
     vector <string> getHostNames() { return this->hostNames; };
 
     // setters 
-    void setExpectedAtendees() { this->expectedAtendees = expectedAtendees; };
-    void setDuration() { this->duration = duration; };
-    void setConferenceTitle() { this->conferenceTitle = conferenceTitle; };
-    void setHostingCompany() { this->hostingCompany = hostingCompany; };
-    void setHostNo() { this->hostNo = hostNo; };
-    void setHostNames() { this->hostNames = hostNames; };
+    void setExpectedAtendees(int expectedAtendees) { this->expectedAtendees = expectedAtendees; };
+    void setDuration(float duration) { this->duration = duration; };
+    void setConferenceTitle(string conferenceTitle) { this->conferenceTitle = conferenceTitle; };
+    void setHostingCompany(Company* hostingCompany) { this->hostingCompany = hostingCompany; };
+    void setHostNo(int hostNo) { this->hostNo = hostNo; };
+    void setHostNames(vector <string> hostNames) { this->hostNames = hostNames; };
 
     Conference(); // empty constructor
     ~Conference(); // destructor
     Conference(int expectedAtendees, float duration, string conferenceTitle, Company* hostingCompany, int hostNo, vector <string> hostNames); // full constructor
     Conference(const Conference& conference); // copy constructor
-    Conference(int expectedAtendees, float duration, string conferenceTitle, int hostNo, vector <string> hostNames); // constructor without assigned company
-    Conference(string conferenceTitle); // title conference constructor
+    Conference(int expectedAtendees, float duration, string conferenceTitle, int hostNo, vector <string> hostNames); // partial constructor 1
+    Conference(string conferenceTitle); // partial constructor 2
     friend ostream& operator <<(ostream& out, const Conference& conference); // output operator overload
     friend istream& operator >>(istream& in, Conference& conference); // input operator overload
     Conference& operator=(const Conference& conference); // = overload
@@ -541,7 +589,7 @@ public:
     Conference operator-(string); // - overload 
     friend Conference operator+(string, Conference); // + commutative
     friend Conference operator-(string, Conference); // - commutative
-    Conference operator+(const Conference&);
+    Conference operator+(const Conference&); // addition
 
 };
 
@@ -619,6 +667,7 @@ istream& operator >>(istream& in, Conference& conference) {
     return in;
 }
 
+// = overload
 Conference& Conference::operator=(const Conference& conference) {
     if (this != &conference) {
         this->expectedAtendees = conference.expectedAtendees;
@@ -632,7 +681,7 @@ Conference& Conference::operator=(const Conference& conference) {
 }
 
 // string cast
-// TODO DEBUG
+// TODO DEBUG str cast conf
 Conference::operator string() {
 
     if (this->hostingCompany == NULL) {
@@ -711,6 +760,7 @@ Conference Conference::operator-(string representative) {
 }
 
 // string + conference
+// TODO debug
 Conference operator+(string str, Conference conference){
     for (auto& name : conference.hostNames) {
         if (str == name) {
@@ -722,6 +772,8 @@ Conference operator+(string str, Conference conference){
     return conference;
 }
 
+// string - conference
+// TODO debug
 Conference operator-(string str, Conference conference){
     for (int i = 0; i < conference.hostNo; i++) {
         if (str == conference.hostNames[i]) {
@@ -734,6 +786,7 @@ Conference operator-(string str, Conference conference){
 }
 
 // addition between two of the same
+// TODO debug
 Conference Conference::operator+(const Conference& conference) {
     Conference ans(*this);
     // illegal action, just return the first operator
@@ -795,7 +848,7 @@ Conference Conference::operator+(const Conference& conference) {
 
 
 // TODO Calendar
-// +-,  partial constructors
+// +-,  functionality
 
 
 
@@ -835,6 +888,8 @@ public:
     Calendar(); // empty constructor
     ~Calendar(); // destructor
     Calendar(string calendarName, string eventType, string month, int noOfDays, int* dates, Event* event); // full constructor
+    Calendar(string calendarName, string month, int noOfDays, int* dates); // partial constructor 1
+    Calendar(string calendarName); // partial constructor 2
     Calendar(const Calendar& calendar); // copy constructor
     friend ostream& operator <<(ostream& out, const Calendar& calendar); // output operator overload
     friend istream& operator >>(istream& in, Calendar& calendar); // input operator overload
@@ -867,13 +922,41 @@ void Calendar::setDates(int dates[]) {
 
 int Calendar::countCalendar = 10000;
 
+// partial constructor 1
+Calendar::Calendar(string calendarName, string month, int noOfDays, int* dates) :calendarID(countCalendar++) {
+    this->calendarName = calendarName;
+    this->eventType = "Unassigned";
+    this->month = month;
+    this->noOfDays = noOfDays;
+    if (this->dates != NULL) {
+        delete[] this->dates;
+    }
+
+    this->dates = new int[noOfDays];
+    for (int i = 0; i < noOfDays; i++) {
+        this->dates[i] = dates[i];
+    }
+    this->event = NULL;
+}
+
+// partial constructor 2
+Calendar::Calendar(string calendarName) :calendarID(countCalendar++) {
+    this->calendarName = calendarName;
+    this->eventType = "Unassigned";
+    this->month = "Unassigned";
+    this->noOfDays = 0;
+    this->dates = new int(0);
+    this->event = NULL;
+}
+
+
 // empty constructor
 Calendar::Calendar():calendarID(countCalendar++) {
     this->calendarName = "New Calendar";
     this->eventType = "Unassigned";
     this->month = "Unassigned";
     this->noOfDays = 0;
-    this->dates = new int(0); //int(0) -> un int = 0 ? da asta face
+    this->dates = new int(0); 
     this->event = NULL;
 }
 
@@ -1169,6 +1252,7 @@ private:
 
     // own variables
     int expectedAtendees;
+    int reservedRooms;
     int conferenceNo;
     float span;
     char* eventName;
@@ -1207,11 +1291,9 @@ public:
     void setCalendar(Calendar* calendar) { this->calendar = calendar; };
     void setConferences(Conference* conferences) { this->conferences = conferences; };
 
-    //TODO redo
-
     Event(); // empty constructor
     ~Event(); // destructor
-    Event(int expectedAtendees, int conferenceNo, float span, char* eventName); // full constructor
+    Event(int expectedAtendees, int reservedRooms, int conferenceNo, float span, char* eventName); // full constructor
     Event(int conferenceNo, char* eventName); // partial constructor 1
     Event(char* eventName); // partial constructor 2
     Event(const Event& event); // copy constructor
@@ -1234,8 +1316,8 @@ public:
     friend Event operator+(Conference, Event); // + overload  
     friend Event operator-(Conference, Event); // - overload 
 
-    Event operator+(Event*); // + overload  
-    Event operator-(Event*); // - overload 
+    Event operator+(const Event&); // + overload  
+    Event operator-(const Event&); // - overload 
 };
 
 int Event::countEvent = 10;
@@ -1255,16 +1337,17 @@ void Event::setEventName(char* eventName) {
 Event::Event() :eventID(countEvent++) {
     this->expectedAtendees = 0;
     this->conferenceNo = 0;
+    this->reservedRooms = 0;
     this->span = 0;
     this->eventName = new char[strlen("New Event") + 1];
     strcpy(this->eventName, "New Event");
 
     // TODO alter values
-    this->hostCompany = new Company[1];
-    this->attendingCompanies = new Company[20];
-    this->eventRooms = new EventRoom[50];
-    this->calendar = new Calendar[1];
-    this->conferences = new Conference[80];
+    this->hostCompany = NULL;
+    this->attendingCompanies = NULL;
+    this->eventRooms = NULL;
+    this->calendar = NULL;
+    this->conferences = NULL;
 }
 
 // partial constructor 1
@@ -1277,10 +1360,10 @@ Event::Event(int conferenceNo, char* eventName) :eventID(countEvent++) {
 
     // TODO alter values
     this->hostCompany = new Company[1];
-    this->attendingCompanies = new Company[20];
+    this->attendingCompanies = NULL;
     this->eventRooms = new EventRoom[50];
     this->calendar = new Calendar[1];
-    this->conferences = new Conference[80];
+    this->conferences = new Conference[conferenceNo];
 }
 
 // partial constructor 2
@@ -1301,54 +1384,45 @@ Event::Event(char* eventName) :eventID(countEvent++) {
 
 // destructor
 Event::~Event() {
-    if (this->eventName != NULL) {
-        delete[] this->eventName;
-        this->eventName = NULL;
-    }
-    if (this->hostCompany != NULL) {
-        delete[] this->hostCompany;
-        this->hostCompany = NULL;
-    }
-    if (this->attendingCompanies != NULL) {
-        delete[] this->attendingCompanies;
-        this->attendingCompanies = NULL;
-    }
-    if (this->eventRooms != NULL) {
-        delete[] this->eventRooms;
-        this->eventRooms = NULL;
-    }
-    if (this->calendar != NULL) {
-        delete[] this->calendar;
-        this->calendar = NULL;
-    }
-    if (this->conferences != NULL) {
-        delete[] this->conferences;
-        this->conferences = NULL;
-    }
+    this->eventName = NULL;
+    this->hostCompany = NULL;
+    this->attendingCompanies = NULL;
+    this->eventRooms = NULL;
+    this->calendar = NULL;
+    this->conferences = NULL;
 }
 
 // full constructor
-Event::Event(int expectedAtendees, int conferenceNo, float span, char* eventName):eventID(countEvent++) {
+Event::Event(int expectedAtendees, int reservedRooms, int conferenceNo, float span, char* eventName):eventID(countEvent++) {
     this->expectedAtendees = expectedAtendees;
     this->conferenceNo = conferenceNo;
+    this->reservedRooms = reservedRooms;
     this->span = span;
     this->eventName = new char[strlen(eventName) + 1];
     strcpy(this->eventName, eventName);
 
-    this->hostCompany = new Company[1];
-    this->attendingCompanies = new Company[20];
-    this->eventRooms = new EventRoom[50];
-    this->calendar = new Calendar[1];
-    this->conferences = new Conference[80];
+    this->hostCompany = new Company;
+    this->attendingCompanies = new Company[expectedAtendees];
+    this->eventRooms = new EventRoom[reservedRooms];
+    this->calendar = new Calendar;
+    this->conferences = new Conference[conferenceNo];
 }
 
 // copy constructor
 Event::Event(const Event& event) :eventID(countEvent++) {
     this->expectedAtendees = event.expectedAtendees;
     this->conferenceNo = event.conferenceNo;
+    this->reservedRooms = event.reservedRooms;
+    this->reservedRooms = reservedRooms;
     this->span = event.span;
     this->eventName = new char[strlen(event.eventName) + 1];
     strcpy(this->eventName, event.eventName);
+
+    this->hostCompany = new Company;
+    this->attendingCompanies = new Company[event.expectedAtendees];
+    this->eventRooms = new EventRoom[event.reservedRooms];
+    this->calendar = new Calendar;
+    this->conferences = new Conference[event.conferenceNo];
 
     this->hostCompany = event.hostCompany;
     this->attendingCompanies = event.attendingCompanies;
@@ -1367,10 +1441,17 @@ Event& Event::operator=(const Event& event) {
 
         this->expectedAtendees = event.expectedAtendees;
         this->conferenceNo = event.conferenceNo;
+        this->reservedRooms = event.reservedRooms;
+        this->hostCompany = event.hostCompany;
         this->span = event.span;
         this->eventName = new char[strlen(event.eventName) + 1];
         strcpy(this->eventName, event.eventName);
 
+        this->hostCompany = event.hostCompany;
+        this->attendingCompanies = event.attendingCompanies;
+        this->eventRooms = event.eventRooms;
+        this->calendar = event.calendar;
+        this->conferences = event.conferences;
     }
     return *this;
 }
@@ -1407,16 +1488,14 @@ ostream& operator<<(ostream& out, const Event& event) {
     out << "This event will have a numer of " << event.conferenceNo << " conferences." << endl;
     out << "The event is expected to last a number of " << event.span << " days." << endl;
     out << "The event is called " << event.eventName << "." << endl;
-    //out << "The event is hosted by " << event.hostCompany->getCompanyName() << "." << endl;
+    out << "The event is hosted by " << event.hostCompany->getCompanyName() << "." << endl;
 
-    out << endl;
     return out;
 }
 
 
 
 // string cast
-// TODO DEBUG
 Event::operator string() {
 
     if (this->eventName == "New Event") {
@@ -1433,15 +1512,16 @@ Event::operator string() {
         string aux2(this->eventName);
         aux += aux2 + " ";
         aux += "and is brought to you by ";
-        aux += this->hostCompany->getCompanyName() + ". ";
-        aux += "It will consist of " + to_string(this->conferenceNo) + " conferences called: ";
+        aux += this->hostCompany->getCompanyName() + ".\n";
+        aux += "It will consist of " + to_string(this->conferenceNo) + " conferences called: \n";
         for (int i = 0; i < conferenceNo; i++) {
-            aux += to_string(i) + ". " + this->conferences[i].getConferenceTitle() + '\n';
+            aux += to_string(i+1) + ". " + this->conferences[i].getConferenceTitle() + '\n';
         }
         return aux;
     }
 }
 
+// index overload
 Conference& Event::operator[](int x) {
 
     if (this->conferences == NULL) {
@@ -1469,18 +1549,21 @@ Event Event::operator++(int) {
 
 // == overload
 bool Event::operator==(const Event& event) {
-    return this->eventName == event.eventName;
+
+    if (strcmp(this->eventName, event.eventName)) {
+        return false;
+    } return true;
+    //return this->eventName == event.eventName;
 }
 
-// TODO DEBUG
+// class function
 void Event::createEvent(Company* hostCompany, Company* companies, EventRoom* eventRooms, Calendar* calendar, Conference* conferences) {
-    this->setHostCompany(hostCompany);
-    this->setAttendingCompanies(companies);
-    this->setEventRooms(eventRooms);
-    this->setCalendar(calendar);
-    this->setConferences(conferences);
+    this->hostCompany = hostCompany;
+    this->attendingCompanies = companies;
+    this->eventRooms = eventRooms;
+    this->calendar = calendar;
+    this->conferences = conferences;
 
-    cout << (*this);
 }
 
 // < operator
@@ -1489,8 +1572,9 @@ bool Event::operator<(const Event& event) {
 }
 
 // Event + Conference
-// TODO debug
 Event Event::operator+(const Conference& conference) {
+    Event ans(*this);
+
     for (int i = 0; i < this->conferenceNo; i++) {
         if (this->conferences[i] == conference) {
             throw runtime_error("This conference is already in this event!");
@@ -1500,19 +1584,18 @@ Event Event::operator+(const Conference& conference) {
     for (int i = 0; i < this->conferenceNo; i++) {
         aux[i] = this->conferences[i];
     }
-    delete[] this->conferences;
-    this->conferences = new Conference[++this->conferenceNo];
-    for (int i = 0; i < this->conferenceNo - 1; i++) {
-        this->conferences[i] = aux[i];
+    ans.conferences = new Conference[++ans.conferenceNo];
+    for (int i = 0; i < ans.conferenceNo - 1; i++) {
+        ans.conferences[i] = aux[i];
     }
-    this->conferences[this->conferenceNo - 1] = conference;
+    ans.conferences[ans.conferenceNo - 1] = conference;
 
-    return *this;
+    return ans;
 }
 
 // Event - Conference
-// TODO debug
 Event Event::operator-(const Conference& conference) {
+    Event ans(*this);
     Conference* aux = new Conference[this->conferenceNo - 1];
     int ptr = 0;
     int ok = 0;
@@ -1524,6 +1607,7 @@ Event Event::operator-(const Conference& conference) {
         }
     }
     if (ok) {
+        
         for (int i = 0; i < this->conferenceNo; i++) {
             if (this->conferences[i] == conference) {
                 continue;
@@ -1532,13 +1616,69 @@ Event Event::operator-(const Conference& conference) {
                 aux[ptr++] = this->conferences[i];
             }
         }
-        delete[] this->conferences;
-        this->conferences = new Conference[--this->conferenceNo];
-        for (int i = 0; i < this->conferenceNo - 1; i++) {
-            this->conferences[i] = aux[i];
+        ans.conferences = new Conference[--ans.conferenceNo];
+        for (int i = 0; i < ans.conferenceNo - 1; i++) {
+            ans.conferences[i] = aux[i];
         }
 
-        return *this;
+        return ans;
+    }
+    else {
+        throw runtime_error("This conference does not exist in the event!");
+    }
+}
+
+// Conference + Event
+Event operator+(Conference conference, Event event) {
+    Event ans(event);
+
+    for (int i = 0; i < event.conferenceNo; i++) {
+        if (event.conferences[i] == conference) {
+            throw runtime_error("This conference is already in this event!");
+        }
+    }
+    Conference* aux = new Conference[event.conferenceNo];
+    for (int i = 0; i < event.conferenceNo; i++) {
+        aux[i] = event.conferences[i];
+    }
+    ans.conferences = new Conference[++ans.conferenceNo];
+    for (int i = 0; i < ans.conferenceNo - 1; i++) {
+        ans.conferences[i] = aux[i];
+    }
+    ans.conferences[ans.conferenceNo - 1] = conference;
+
+    return ans;
+}
+
+// Conference - Event
+Event operator-(Conference conference, Event event) {
+    Event ans(event);
+
+    Conference* aux = new Conference[event.conferenceNo - 1];
+    int ptr = 0;
+    int ok = 0;
+
+    for (int i = 0; i < event.conferenceNo; i++) {
+        if (event.conferences[i] == conference) {
+            ok = 1;
+            break;
+        }
+    }
+    if (ok) {
+        for (int i = 0; i < event.conferenceNo; i++) {
+            if (event.conferences[i] == conference) {
+                continue;
+            }
+            else {
+                aux[ptr++] = event.conferences[i];
+            }
+        }
+        ans.conferences = new Conference[--ans.conferenceNo];
+        for (int i = 0; i < ans.conferenceNo; i++) {
+            ans.conferences[i] = aux[i];
+        }
+
+        return ans;
     }
     else {
         throw runtime_error("This conference does not exist in the event!");
@@ -1546,85 +1686,33 @@ Event Event::operator-(const Conference& conference) {
 }
 
 // + overload  
-// TODO debug
-Event Event::operator+(Event* event) {
-    Conference* aux = new Conference[this->conferenceNo + event->conferenceNo];
+Event Event::operator+(const Event& event) {
+    Event ans(*this);
+    Conference* aux = new Conference[this->conferenceNo + event.conferenceNo];
 
     for (int i = 0; i < this->conferenceNo; i++) {
         aux[i] = this->conferences[i];
     }
-    for (int i = this->conferenceNo; i < this->conferenceNo + event->getConferenceNo(); i++) {
-        aux[i] = event->conferences[i - this->conferenceNo];
+    for (int i = this->conferenceNo; i < this->conferenceNo + event.conferenceNo; i++) {
+        aux[i] = event.conferences[i - this->conferenceNo];
     }
-    this->conferenceNo += event->conferenceNo;
+    ans.conferenceNo += event.conferenceNo;
+    ans.conferences = aux;
 
-    return *this;
+    return ans;
 }
 
 // - overload 
-// TODO debug
-Event Event::operator-(Event* event) {
-    this->conferenceNo = event->conferenceNo > this->conferenceNo ? 0 : this->conferenceNo - event->conferenceNo;
-    return *this;
+Event Event::operator-(const Event& event) {
+    Event ans(*this);
+
+    for (int i = 0; i < event.conferenceNo; i++) {
+        ans = (ans - event.conferences[i]);
+    }
+    return ans;
 }
 
-//// Addition and subtraction between Conference and Event
-//
-//// + overload 
-//Event Conference::operator+(Event& event) {
-//
-//    for (int i = 0; i < event; i++) {
-//        if (this->conferences[i] == conference) {
-//            throw runtime_error("This conference is already in this event!");
-//        }
-//    }
-//    Conference* aux = new Conference[this->conferenceNo];
-//    for (int i = 0; i < this->conferenceNo; i++) {
-//        aux[i] = this->conferences[i];
-//    }
-//    delete[] this->conferences;
-//    this->conferences = new Conference[++this->conferenceNo];
-//    for (int i = 0; i < this->conferenceNo - 1; i++) {
-//        this->conferences[i] = aux[i];
-//    }
-//    this->conferences[this->conferenceNo - 1] = conference;
-//
-//    return *this;
-//}
-//
-//// - overload 
-//Event Event::operator-(Event* event) {
-//    Conference* aux = new Conference[this->conferenceNo - 1];
-//    int ptr = 0;
-//    int ok = 0;
-//
-//    for (int i = 0; i < this->conferenceNo; i++) {
-//        if (this->conferences[i] == conference) {
-//            ok = 1;
-//            break;
-//        }
-//    }
-//    if (ok) {
-//        for (int i = 0; i < this->conferenceNo; i++) {
-//            if (this->conferences[i] == conference) {
-//                continue;
-//            }
-//            else {
-//                aux[ptr++] = this->conferences[i];
-//            }
-//        }
-//        delete[] this->conferences;
-//        this->conferences = new Conference[--this->conferenceNo];
-//        for (int i = 0; i < this->conferenceNo - 1; i++) {
-//            this->conferences[i] = aux[i];
-//        }
-//
-//        return *this;
-//    }
-//    else {
-//        throw runtime_error("This conference does not exist in the event!");
-//    }
-//}
+
 
 
 
@@ -1661,7 +1749,7 @@ Event Event::operator-(Event* event) {
 int main() {
 
     // (bool hosting, string companyName, int representativeNo, vector <string> representatives)
-    Company c1(false,"Armada",3,{"Daniel","Petru","Alexandru"});
+    Company c1(true,"Armada",3,{"Daniel","Petru","Alexandru"});
     Company c2(true,"QuikSolv",2,{"Dana","Damian"});
     Company c3(true,"TerBonna",5,{"Cristian","Eduard","Flavia", "Fabiana", "Emma"});
     //cout << c1 << c2 << c3;
@@ -1670,8 +1758,53 @@ int main() {
     
     // int expectedAtendees, float duration, string conferenceTitle, Company* hostingCompany, int hostNo, vector <string> hostNames)
     Conference co1(25,3.5,"Programare etica",&c3,2,{"Cristian", "Fabiana"});
-    Conference co3(25,3.5,"Programare etica",&c3,2,{"Eduard", "Emma"});
     Conference co2(40, 2, "E-Government", &c2, 2, {"Dana", "Damian"});
+    Conference co3(25,3.5,"Programare etica",&c3,2,{"Eduard", "Emma"});
+    Conference co4(50, 4, "Programare functionala", &c1, 2, { "Daniel", "Alexandru" });
+
+    EventRoom er1("Skip Room", 200, 'A', 3, {"Aer conditionat", "Dozatoare", "Fierbator de apa"});
+    EventRoom er2("Electrify Room", 180, 'B', 3, {"Aer conditionat", "Dozatoare", "Fierbator de apa"});
+    EventRoom er3("Darwin Solenza Room", 320, 'D', 4, {"Aer conditionat", "Dozatoare", "Fierbator de apa", "Extinctor"});
+
+    char* aux = new char[strlen("Etica in programare si introducere in E-Government") + 1];
+    strcpy(aux, "Etica in programare si introducere in E-Government");
+
+    Event e1(500,3,3,13.5,aux);
+    Company* cl = new Company[3];
+    cl[0] = c1; 
+    cl[1] = c2; 
+    cl[2] = c3;
+    EventRoom* erl = new EventRoom[3];
+    erl[0] = er1;
+    erl[1] = er2;
+    erl[2] = er3;
+    Conference* col = new Conference[3];
+    col[0] = co1;
+    col[1] = co2;
+    col[2] = co3;
+    e1.createEvent(&c3,cl,erl,NULL,col);
+
+    Event e2;
+    e2 = e1;
+    cout << (string)(e1 + e2);
+    cout << (string)e2;
+    cout << (string)e1;
+
+    co1.setHostingCompany(nullptr);
+    cout << (string)co1;
+    
+    Event e3;
+    //cout << (string)e3;
+    
+
+    cout << "Compileaza. GG." << endl;
+    return 0;
+
+    //e1.createEvent(&c3,{&c1,&c2,&c3},{&er1,&er2,&er3},NULL,{&co1,&co2,&co3});
+
+    /*cout << er1;
+    cout << er2;
+    cout << 330 - er3;*/
 
     /*cout << co1;
     co1 = co1 + "Ioana";
@@ -1684,7 +1817,9 @@ int main() {
     cout << co2;
     co2 = "Dana" - co2;
     cout << co2;*/
-    cout << (co1 + co3);
+    //cout << (co1 + co3);
+
+
     
 
 
@@ -1784,6 +1919,11 @@ int main() {
     //
     //cout << "Thank you for using our app!" << endl;
 
-    cout << "Compileaza. GG." << endl;
-    return 0;
+    
 }
+
+
+// li-l dam pe tot
+// li- le dam tot codul
+// sa se spele cu el pe cap
+// nici noi nu mai intelegem ce dracu am scris in codul ala
