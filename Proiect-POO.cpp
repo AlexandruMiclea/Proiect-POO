@@ -534,7 +534,8 @@ EventRoom operator+(int newSeats, EventRoom eventRoom) {
 
 
 
-
+// TODO conference
+// functionality
 
 
 class Conference {
@@ -848,7 +849,7 @@ Conference Conference::operator+(const Conference& conference) {
 
 
 // TODO Calendar
-// +-,  functionality
+// functionality
 
 
 
@@ -864,8 +865,6 @@ private:
     int noOfDays;
     int* dates;
 
-    Event* event;
-
 public:
 
     // getters 
@@ -875,7 +874,6 @@ public:
     string getMonth() { return this->month; };
     int getnoOfDays() { return this->noOfDays; };
     int* getDates() { return this->dates; };
-    Event* getEvent() { return this->event; };
 
     // setters 
     void setCalendarName(string calendarNamecalendarName) { this->calendarName = calendarName; };
@@ -883,11 +881,10 @@ public:
     void setMonth(string month) { this->month = month; };
     void setnoOfDays(int noOfDays) { this->noOfDays = noOfDays; };
     void setDates(int dates[]);
-    void setEvent(Event* event) {this->event = event;}
 
     Calendar(); // empty constructor
     ~Calendar(); // destructor
-    Calendar(string calendarName, string eventType, string month, int noOfDays, int* dates, Event* event); // full constructor
+    Calendar(string calendarName, string eventType, string month, int noOfDays, int* dates); // full constructor
     Calendar(string calendarName, string month, int noOfDays, int* dates); // partial constructor 1
     Calendar(string calendarName); // partial constructor 2
     Calendar(const Calendar& calendar); // copy constructor
@@ -898,9 +895,7 @@ public:
     Calendar& operator++(); // ++ prefix operator
     Calendar operator++(int); // ++ postfix operator
     Calendar operator+(int); // + overload  
-    // adunare cu un int imi adauga atatea zile noi
     Calendar operator-(int); // - overload 
-    // scadere cu un int imi scoate atatea zile din calendar
     friend Calendar operator-(int, Calendar); // - comutativ
     friend Calendar operator+(int, Calendar); // + comutativ
     bool operator==(const Calendar&); // == overload
@@ -936,7 +931,6 @@ Calendar::Calendar(string calendarName, string month, int noOfDays, int* dates) 
     for (int i = 0; i < noOfDays; i++) {
         this->dates[i] = dates[i];
     }
-    this->event = NULL;
 }
 
 // partial constructor 2
@@ -945,8 +939,7 @@ Calendar::Calendar(string calendarName) :calendarID(countCalendar++) {
     this->eventType = "Unassigned";
     this->month = "Unassigned";
     this->noOfDays = 0;
-    this->dates = new int(0);
-    this->event = NULL;
+    this->dates = NULL;
 }
 
 
@@ -956,8 +949,7 @@ Calendar::Calendar():calendarID(countCalendar++) {
     this->eventType = "Unassigned";
     this->month = "Unassigned";
     this->noOfDays = 0;
-    this->dates = new int(0); 
-    this->event = NULL;
+    this->dates = NULL; 
 }
 
 // destructor
@@ -970,12 +962,11 @@ Calendar::~Calendar() {
 }
 
 // full constructor
-Calendar::Calendar(string calendarName, string eventType, string month, int noOfDays, int* dates, Event* event):calendarID(countCalendar++) {
+Calendar::Calendar(string calendarName, string eventType, string month, int noOfDays, int* dates):calendarID(countCalendar++) {
     this->calendarName = calendarName;
     this->eventType = eventType;
     this->month = month;
     this->noOfDays = noOfDays;
-    this->event = event;
     
     if (this->dates != NULL) {
         delete[] this->dates;
@@ -993,7 +984,6 @@ Calendar::Calendar(const Calendar& calendar) :calendarID(countCalendar++){
     this->eventType = calendar.eventType;
     this->month = calendar.month;
     this->noOfDays = calendar.noOfDays;
-    this->event = calendar.event;
 
     if (this->dates != NULL) {
         delete[] this->dates;
@@ -1057,7 +1047,6 @@ Calendar& Calendar::operator=(const Calendar& calendar){
         this->eventType = calendar.eventType;
         this->month = calendar.month;
         this->noOfDays = calendar.noOfDays;
-        this->event = calendar.event;
 
         if (this->dates != NULL) {
             delete[] this->dates;
@@ -1126,33 +1115,6 @@ Calendar Calendar::operator++(int) {
     return aux;
 }
 
-
-// + overload
-Calendar Calendar::operator+(int val) {
-    
-    Calendar aux(*this);
-
-    if (this->dates != NULL) {
-        int* aux = new int[this->noOfDays];
-        for (int i = 0; i < noOfDays; i++) aux[i] = this->dates[i];
-
-        delete[] this->dates;
-        this->noOfDays++;
-        this->dates = new int[this->noOfDays];
-        for (int i = 0; i < noOfDays; i++) this->dates[i] = aux[i];
-        this->dates[this->noOfDays] = 0;
-    }
-    else {
-        this->noOfDays = 1;
-        this->dates = new int(0);
-    }
-
-
-    return aux;
-}
-
-
-
 // string cast
 // TODO DEBUG
 Calendar::operator string() {
@@ -1178,7 +1140,7 @@ Calendar::operator string() {
 
 // == overload
 bool Calendar::operator==(const Calendar& calendar) {
-    return this->event == calendar.event;
+    return this->calendarName == calendar.calendarName;
 }
 
 // < overload
@@ -1187,26 +1149,100 @@ bool Calendar::operator<(const Calendar& calendar) {
 }
 
 // + overload  
-// adding with an int will add me this amount of days
-//Calendar Calendar::operator+(int x){
-//    
-//}
-//
+Calendar Calendar::operator+(int x){
+    Calendar ans(*this);
+
+    int* aux = new int[ans.noOfDays];
+    for (int i = 0; i < this->noOfDays; i++) {
+        aux[i] = ans.dates[i];
+    }
+
+    delete[] ans.dates;
+    ans.dates = new int[++ans.noOfDays];
+    for (int i = 0; i < this->noOfDays; i++) {
+        ans.dates[i] = aux[i];
+    }
+    ans.dates[ans.noOfDays - 1] = x;
+
+    return ans;
+}
+
 // - overload 
-// scadere cu un int imi scoate atatea zile din calendar
-//Calendar Calendar::operator-(int x) {
-//
-//}
-//
+// TODO test
+Calendar Calendar::operator-(int x) {
+    int ok = 0;
+
+    for (int i = 0; i < this->noOfDays; i++) {
+        if (this->dates[i] == x) ok = 1;
+    }
+    if (ok) {
+        Calendar ans(*this);
+        int* aux = new int[ans.noOfDays];
+        for (int i = 0; i < this->noOfDays; i++) {
+            aux[i] = ans.dates[i];
+        }
+
+        delete[] ans.dates;
+        ans.dates = new int[++ans.noOfDays];
+        for (int i = 0; i < this->noOfDays; i++) {
+            ans.dates[i] = aux[i];
+        }
+        ans.dates[ans.noOfDays - 1] = x;
+
+        return ans;
+    }
+    else {
+        throw runtime_error("This date does not exist!");
+    }
+}
+
 // - comutativ
-//Calendar operator-(int x, Calendar calendar) {
-//
-//}
-//
+//TODO test
+Calendar operator-(int x, Calendar calendar) {
+    int ok = 0;
+
+    for (int i = 0; i < calendar.noOfDays; i++) {
+        if (calendar.dates[i] == x) ok = 1;
+    }
+    if (ok) {
+        Calendar ans(calendar);
+        int* aux = new int[ans.noOfDays];
+        for (int i = 0; i < calendar.noOfDays; i++) {
+            aux[i] = ans.dates[i];
+        }
+
+        delete[] ans.dates;
+        ans.dates = new int[++ans.noOfDays];
+        for (int i = 0; i < calendar.noOfDays; i++) {
+            ans.dates[i] = aux[i];
+        }
+        ans.dates[ans.noOfDays - 1] = x;
+
+        return ans;
+    }
+    else {
+        throw runtime_error("This date does not exist!");
+    }
+}
+
 // + comutativ
-//Calendar operator+(int x, Calendar calendar) {
-//
-//}
+Calendar operator+(int x, Calendar calendar) {
+    Calendar ans(calendar);
+
+    int* aux = new int[ans.noOfDays];
+    for (int i = 0; i < calendar.noOfDays; i++) {
+        aux[i] = ans.dates[i];
+    }
+
+    delete[] ans.dates;
+    ans.dates = new int[++ans.noOfDays];
+    for (int i = 0; i < calendar.noOfDays; i++) {
+        ans.dates[i] = aux[i];
+    }
+    ans.dates[ans.noOfDays - 1] = x;
+
+    return ans;
+}
 
 
 
