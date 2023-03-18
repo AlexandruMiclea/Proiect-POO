@@ -2,7 +2,6 @@
 //FMI UNIBUC 2023
 
 // TODO BIG
-// 2 * 2 class addition
 // menu & functionality
 
 #include <iostream>
@@ -22,7 +21,7 @@ class Conference;
 
 
 // TODO Company
-// partial constructors, functionality
+// functionality
 
 
 class Company {
@@ -55,6 +54,8 @@ public:
     Company(); // empty constructor
     ~Company(); // destructor
     Company(bool hosting, string companyName, int representativeNo, vector <string> representatives); // full constructor
+    Company(bool hosting, string companyName, int representativeNo); // partial constructor 1
+    Company(string companyName, int representativeNo); // partial constructor 2
     Company(const Company& company); // copy constructor
     friend ostream& operator <<(ostream& out, const Company& Company); // output operator overload
     friend istream& operator >>(istream& in, Company& Company); // input operator overload
@@ -77,10 +78,23 @@ Company::Company() :companyID(countID++) {
     this->hosting = false;
     this->companyName = "New Company";
     this->representativeNo = 0;
-    this->representatives.push_back("Representative Name");
 }
 
-Company::~Company() {
+// partial constructor 1
+Company::Company(bool hosting, string companyName, int representativeNo) :companyID(countID++) {
+    this->hosting = hosting;
+    this->companyName = companyName;
+    this->representativeNo = representativeNo;
+}
+
+// partial constructor 2
+Company::Company(string companyName, int representativeNo) :companyID(countID++) {
+    this->hosting = false;
+    this->companyName = companyName;
+    this->representativeNo = representativeNo;
+}
+
+Company::~Company(){
     this->representatives.clear();
 }
 
@@ -149,7 +163,6 @@ Company& Company::operator=(const Company& company) {
 
 
 // string cast
-// TODO DEBUG
 Company::operator string() {
 
     if (this->companyName == "New Company") {
@@ -222,47 +235,6 @@ Company* operator*(int x, Company company) {
     }
     return ans;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // TODO EventRoom
 // functionality
@@ -421,7 +393,6 @@ EventRoom& EventRoom::operator=(const EventRoom& eventRoom){
 }
 
 // string cast
-// TODO DEBUG
 EventRoom::operator string() {
 
     if (this->pavilion == 'X') {
@@ -494,45 +465,6 @@ EventRoom operator+(int newSeats, EventRoom eventRoom) {
     aux.seatNo += newSeats;
     return aux;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // TODO conference
 // functionality
@@ -682,7 +614,6 @@ Conference& Conference::operator=(const Conference& conference) {
 }
 
 // string cast
-// TODO DEBUG str cast conf
 Conference::operator string() {
 
     if (this->hostingCompany == NULL) {
@@ -737,7 +668,6 @@ bool Conference::operator<(const Conference& conference) {
 
 
 // + overload  
-// TODO test
 Conference Conference::operator+(string representative) {
     this->hostNo++;
     this->hostNames.push_back(representative);
@@ -745,7 +675,6 @@ Conference Conference::operator+(string representative) {
 }
 
 // - overload 
-// TODO test
 Conference Conference::operator-(string representative) {
     vector <string> auxx;
     for (auto& rep : this->hostNames) {
@@ -761,7 +690,6 @@ Conference Conference::operator-(string representative) {
 }
 
 // string + conference
-// TODO debug
 Conference operator+(string str, Conference conference){
     for (auto& name : conference.hostNames) {
         if (str == name) {
@@ -774,7 +702,6 @@ Conference operator+(string str, Conference conference){
 }
 
 // string - conference
-// TODO debug
 Conference operator-(string str, Conference conference){
     for (int i = 0; i < conference.hostNo; i++) {
         if (str == conference.hostNames[i]) {
@@ -787,7 +714,6 @@ Conference operator-(string str, Conference conference){
 }
 
 // addition between two of the same
-// TODO debug
 Conference Conference::operator+(const Conference& conference) {
     Conference ans(*this);
     // illegal action, just return the first operator
@@ -806,53 +732,7 @@ Conference Conference::operator+(const Conference& conference) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// TODO Calendar
-// functionality
-
-
-
+// todo functionality
 class Calendar {
 private:
 
@@ -909,13 +789,26 @@ void Calendar::setDates(int dates[]) {
         delete[] this->dates;
     }
 
-    this->dates = new int[sizeof(dates)];
-    for (int i = 0; i < sizeof(dates); i++) {
+    this->dates = new int[this->noOfDays];
+    for (int i = 0; i < this->noOfDays; i++) {
         this->dates[i] = dates[i];
     }
 }
 
 int Calendar::countCalendar = 10000;
+
+// full constructor
+Calendar::Calendar(string calendarName, string eventType, string month, int noOfDays, int* dates) :calendarID(countCalendar++) {
+    this->calendarName = calendarName;
+    this->eventType = eventType;
+    this->month = month;
+    this->noOfDays = noOfDays;
+
+    this->dates = new int[noOfDays];
+    for (int i = 0; i < noOfDays; i++) {
+        this->dates[i] = dates[i];
+    }
+}
 
 // partial constructor 1
 Calendar::Calendar(string calendarName, string month, int noOfDays, int* dates) :calendarID(countCalendar++) {
@@ -923,9 +816,6 @@ Calendar::Calendar(string calendarName, string month, int noOfDays, int* dates) 
     this->eventType = "Unassigned";
     this->month = month;
     this->noOfDays = noOfDays;
-    if (this->dates != NULL) {
-        delete[] this->dates;
-    }
 
     this->dates = new int[noOfDays];
     for (int i = 0; i < noOfDays; i++) {
@@ -956,25 +846,8 @@ Calendar::Calendar():calendarID(countCalendar++) {
 Calendar::~Calendar() {
     
     if (this->dates != NULL) {
-        delete[] this->dates;
+        delete this->dates;
         this->dates = NULL;
-    }
-}
-
-// full constructor
-Calendar::Calendar(string calendarName, string eventType, string month, int noOfDays, int* dates):calendarID(countCalendar++) {
-    this->calendarName = calendarName;
-    this->eventType = eventType;
-    this->month = month;
-    this->noOfDays = noOfDays;
-    
-    if (this->dates != NULL) {
-        delete[] this->dates;
-    }
-
-    this->dates = new int[sizeof(dates)];
-    for (int i = 0; i < sizeof(dates); i++) {
-        this->dates[i] = dates[i];
     }
 }
 
@@ -985,12 +858,8 @@ Calendar::Calendar(const Calendar& calendar) :calendarID(countCalendar++){
     this->month = calendar.month;
     this->noOfDays = calendar.noOfDays;
 
-    if (this->dates != NULL) {
-        delete[] this->dates;
-    }
-
-    this->dates = new int[sizeof(calendar.dates)];
-    for (int i = 0; i < sizeof(calendar.dates); i++) {
+    this->dates = new int[calendar.noOfDays];
+    for (int i = 0; i < calendar.noOfDays; i++) {
         this->dates[i] = calendar.dates[i];
     }
 }
@@ -998,12 +867,13 @@ Calendar::Calendar(const Calendar& calendar) :calendarID(countCalendar++){
 ostream& operator <<(ostream& out, const Calendar& calendar) {
     
     out << "This calendar is called " << calendar.calendarName << "." << endl;
-    out << "The type of event it tracks is" << calendar.eventType << "." << endl;
-    out << "The event takes place in the month of " << calendar.month << ", across " << calendar.noOfDays << "." << endl;
-    out << "The days in which the event takes place are: " << endl;
-    for (int i = 1; i <= calendar.noOfDays; i++) {
+    out << "The type of event it tracks is " << calendar.eventType << "." << endl;
+    out << "The event takes place in the month of " << calendar.month << ", across " << calendar.noOfDays << " days." << endl;
+    out << "The days in which the event takes place are: ";
+    for (int i = 1; i <= calendar.noOfDays - 1; i++) {
         out << calendar.dates[i - 1] << ", ";
     }
+    out << calendar.dates[calendar.noOfDays - 1] <<".\n";
 
     return out;
 }
@@ -1063,7 +933,6 @@ Calendar& Calendar::operator=(const Calendar& calendar){
 
 
 // [] overload
-// TODO debug dupa ce faci Event
 int Calendar::operator[](int zi) {
     if (zi < 0 || zi >= this->noOfDays) throw runtime_error("Invalid index!");
     if (this->noOfDays == NULL) throw runtime_error("Days were not assigned!");
@@ -1072,7 +941,6 @@ int Calendar::operator[](int zi) {
 }
 
 // ++ prefix overload
-// TODO DEBUG
 Calendar& Calendar::operator++() {
     
     if (this->dates != NULL) {
@@ -1082,10 +950,11 @@ Calendar& Calendar::operator++() {
         delete[] this->dates;
         this->noOfDays++;
         this->dates = new int[this->noOfDays];
-        for (int i = 0; i < noOfDays; i++) this->dates[i] = aux[i];
-        this->dates[this->noOfDays] = 0;
+        for (int i = 0; i < noOfDays - 1; i++) this->dates[i] = aux[i];
+        this->dates[this->noOfDays - 1] = 0;
     }
     else {
+        this->noOfDays = 1;
         this->dates = new int(0);
     }
 
@@ -1093,19 +962,22 @@ Calendar& Calendar::operator++() {
 }
 
 // ++ postfix operator
-// TODO DEBUG
 Calendar Calendar::operator++(int) {
     Calendar aux(*this);
 
     if (this->dates != NULL) {
         int* aux = new int[this->noOfDays];
-        for (int i = 0; i < noOfDays; i++) aux[i] = this->dates[i];
+        for (int i = 0; i < this->noOfDays; i++){
+            aux[i] = this->dates[i];
+        }
 
         delete[] this->dates;
         this->noOfDays++;
         this->dates = new int[this->noOfDays];
-        for (int i = 0; i < noOfDays; i++) this->dates[i] = aux[i];
-        this->dates[this->noOfDays] = 0;
+        for (int i = 0; i < this->noOfDays - 1; i++){
+            this->dates[i] = aux[i];
+        }
+        this->dates[this->noOfDays - 1] = 0;
     }
     else {
         this->noOfDays = 1;
@@ -1116,7 +988,6 @@ Calendar Calendar::operator++(int) {
 }
 
 // string cast
-// TODO DEBUG
 Calendar::operator string() {
     
     if (this->month == "Unassigned") {
@@ -1168,7 +1039,6 @@ Calendar Calendar::operator+(int x){
 }
 
 // - overload 
-// TODO test
 Calendar Calendar::operator-(int x) {
     int ok = 0;
 
@@ -1177,17 +1047,15 @@ Calendar Calendar::operator-(int x) {
     }
     if (ok) {
         Calendar ans(*this);
-        int* aux = new int[ans.noOfDays];
-        for (int i = 0; i < this->noOfDays; i++) {
-            aux[i] = ans.dates[i];
-        }
 
         delete[] ans.dates;
-        ans.dates = new int[++ans.noOfDays];
+        ans.dates = new int[--ans.noOfDays];
+        int ptr = 0;
+
         for (int i = 0; i < this->noOfDays; i++) {
-            ans.dates[i] = aux[i];
+            if (this->dates[i] == x) continue;
+            ans.dates[ptr++] = this->dates[i];
         }
-        ans.dates[ans.noOfDays - 1] = x;
 
         return ans;
     }
@@ -1197,7 +1065,6 @@ Calendar Calendar::operator-(int x) {
 }
 
 // - comutativ
-//TODO test
 Calendar operator-(int x, Calendar calendar) {
     int ok = 0;
 
@@ -1206,17 +1073,15 @@ Calendar operator-(int x, Calendar calendar) {
     }
     if (ok) {
         Calendar ans(calendar);
-        int* aux = new int[ans.noOfDays];
-        for (int i = 0; i < calendar.noOfDays; i++) {
-            aux[i] = ans.dates[i];
-        }
 
         delete[] ans.dates;
-        ans.dates = new int[++ans.noOfDays];
+        ans.dates = new int[--ans.noOfDays];
+        int ptr = 0;
+
         for (int i = 0; i < calendar.noOfDays; i++) {
-            ans.dates[i] = aux[i];
+            if (calendar.dates[i] == x) continue;
+            ans.dates[ptr++] = calendar.dates[i];
         }
-        ans.dates[ans.noOfDays - 1] = x;
 
         return ans;
     }
@@ -1244,42 +1109,6 @@ Calendar operator+(int x, Calendar calendar) {
     return ans;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// TODO TEST
 class Event {
 private:
 
@@ -1529,8 +1358,6 @@ ostream& operator<<(ostream& out, const Event& event) {
     return out;
 }
 
-
-
 // string cast
 Event::operator string() {
 
@@ -1749,47 +1576,31 @@ Event Event::operator-(const Event& event) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int main() {
+    
+    int* x = new int[2];
+    x[0] = 1;
+    x[1] = 3;
+    int* y = new int[3];
+    y[0] = 1;
+    y[1] = 2;
+    y[2] = 3;
+    int* z = new int[4];
+    z[0] = 1;
+    z[1] = 3;
+    z[2] = 5;
+    z[2] = 7;
 
-    // (bool hosting, string companyName, int representativeNo, vector <string> representatives)
+    Calendar ca1("Calendar 1", "Programming", "May", 2, x);
+    Calendar ca2("Calendar 2", "Programming2", "June", 3, y);
+    Calendar ca3("Calendar 3", "Programming3", "August", 4, z);
+
+
+    //(bool hosting, string companyName, int representativeNo, vector <string> representatives)
     Company c1(true,"Armada",3,{"Daniel","Petru","Alexandru"});
     Company c2(true,"QuikSolv",2,{"Dana","Damian"});
     Company c3(true,"TerBonna",5,{"Cristian","Eduard","Flavia", "Fabiana", "Emma"});
     //cout << c1 << c2 << c3;
-
     // la conference string cast nu are sens!
     
     // int expectedAtendees, float duration, string conferenceTitle, Company* hostingCompany, int hostNo, vector <string> hostNames)
@@ -1798,39 +1609,43 @@ int main() {
     Conference co3(25,3.5,"Programare etica",&c3,2,{"Eduard", "Emma"});
     Conference co4(50, 4, "Programare functionala", &c1, 2, { "Daniel", "Alexandru" });
 
-    EventRoom er1("Skip Room", 200, 'A', 3, {"Aer conditionat", "Dozatoare", "Fierbator de apa"});
-    EventRoom er2("Electrify Room", 180, 'B', 3, {"Aer conditionat", "Dozatoare", "Fierbator de apa"});
-    EventRoom er3("Darwin Solenza Room", 320, 'D', 4, {"Aer conditionat", "Dozatoare", "Fierbator de apa", "Extinctor"});
+    //EventRoom er1("Skip Room", 200, 'A', 3, {"Aer conditionat", "Dozatoare", "Fierbator de apa"});
+    //EventRoom er2("Electrify Room", 180, 'B', 3, {"Aer conditionat", "Dozatoare", "Fierbator de apa"});
+    //EventRoom er3("Darwin Solenza Room", 320, 'D', 4, {"Aer conditionat", "Dozatoare", "Fierbator de apa", "Extinctor"});
+    cout << co1 + co3;
+    // string calendarName, string eventType, string month, int noOfDays, int* dates 
 
-    char* aux = new char[strlen("Etica in programare si introducere in E-Government") + 1];
-    strcpy(aux, "Etica in programare si introducere in E-Government");
-
-    Event e1(500,3,3,13.5,aux);
-    Company* cl = new Company[3];
-    cl[0] = c1; 
-    cl[1] = c2; 
-    cl[2] = c3;
-    EventRoom* erl = new EventRoom[3];
-    erl[0] = er1;
-    erl[1] = er2;
-    erl[2] = er3;
-    Conference* col = new Conference[3];
-    col[0] = co1;
-    col[1] = co2;
-    col[2] = co3;
-    e1.createEvent(&c3,cl,erl,NULL,col);
-
-    Event e2;
-    e2 = e1;
-    cout << (string)(e1 + e2);
-    cout << (string)e2;
-    cout << (string)e1;
-
-    co1.setHostingCompany(nullptr);
-    cout << (string)co1;
     
-    Event e3;
-    //cout << (string)e3;
+
+    /*char* aux = new char[strlen("Etica in programare si introducere in E-Government") + 1];
+    strcpy(aux, "Etica in programare si introducere in E-Government");*/
+
+    //Event e1(500,3,3,13.5,aux);
+    //Company* cl = new Company[3];
+    //cl[0] = c1; 
+    //cl[1] = c2; 
+    //cl[2] = c3;
+    //EventRoom* erl = new EventRoom[3];
+    //erl[0] = er1;
+    //erl[1] = er2;
+    //erl[2] = er3;
+    //Conference* col = new Conference[3];
+    //col[0] = co1;
+    //col[1] = co2;
+    //col[2] = co3;
+    //e1.createEvent(&c3,cl,erl,NULL,col);
+
+    //Event e2;
+    //e2 = e1;
+    //cout << (string)(e1 + e2);
+    //cout << (string)e2;
+    //cout << (string)e1;
+
+    //co1.setHostingCompany(nullptr);
+    //cout << (string)co1;
+    //
+    //Event e3;
+    ////cout << (string)e3;
     
 
     cout << "Compileaza. GG." << endl;
@@ -1957,9 +1772,3 @@ int main() {
 
     
 }
-
-
-// li-l dam pe tot
-// li- le dam tot codul
-// sa se spele cu el pe cap
-// nici noi nu mai intelegem ce dracu am scris in codul ala
