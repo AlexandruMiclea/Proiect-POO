@@ -112,23 +112,26 @@ Company::Company(const Company& company) :companyID(countID++) {
 }
 
 istream& operator >>(istream& in, Company& company) {
-    cout << "What is your company's name: ";
+    std::cout << "What is your company's name: ";
     in >> company.companyName;
 
-    cout << "Are you expected to host a conference: ";
-    in >> company.hosting;
+    std::cout << "Are you expected to host a conference (y/n): ";
+    char aux;
+    in >> aux;
+    if (aux == 'y' || aux == 'Y') company.hosting = true;
+    else company.hosting = false;
 
-    cout << "How many representatives will be present from your company: ";
+    std::cout << "How many representatives will be present from your company: ";
     in >> company.representativeNo;
 
     for (int i = 1; i <= company.representativeNo; i++) {
-        cout << "Enter the name of representative " << i << ": ";
+        std::cout << "Enter the name of representative " << i << ": ";
         string aux;
         in >> aux;
         company.representatives.push_back(aux);
     }
 
-    cout << endl;
+    std::cout << endl;
     return in;
 }
 
@@ -358,20 +361,20 @@ ostream& operator <<(ostream& out, const EventRoom& eventRoom) {
 // input overload
 istream& operator >>(istream& in, EventRoom& eventRoom) {
 
-    cout << "What is this room's name: ";
+    std::cout << "What is this room's name: ";
     in >> eventRoom.roomName;
 
-    cout << "How many seats does it have: ";
+    std::cout << "How many seats does it have: ";
     in >> eventRoom.seatNo;
 
-    cout << "In what pavilion does it exist: ";
+    std::cout << "In what pavilion does it exist: ";
     in >> eventRoom.pavilion;
 
-    cout << "How many facilities does this room have: ";
+    std::cout << "How many facilities does this room have: ";
     in >> eventRoom.noOfFacilities;
 
     for (int i = 1; i <= eventRoom.noOfFacilities; i++) {
-        cout << "Enter facility number " << i << ": ";
+        std::cout << "Enter facility number " << i << ": ";
         string aux;
         in >> aux;
         eventRoom.facilities.push_back(aux);
@@ -567,10 +570,16 @@ ostream& operator <<(ostream& out, const Conference& conference) {
     out << "The conference's title is " << conference.conferenceTitle << "." << endl;
     out << "This conference is expected to have " << conference.expectedAtendees << " attendants." << endl;
     out << "This conference will last " << conference.duration << " hours." << endl;
-    out << "It will be hosted by the " << conference.hostNo << " hosts of " << conference.hostingCompany->getCompanyName() << ". Their names are: " << endl;
-    for (int i = 1; i <= conference.hostNo; i++) {
-        out << i << ". " << conference.hostNames[i - 1] << endl;
+    if (conference.hostingCompany != NULL) {
+        out << "It will be hosted by the " << conference.hostNo << " hosts of " << conference.hostingCompany->getCompanyName() << ". Their names are: " << endl;
+        for (int i = 1; i <= conference.hostNo; i++) {
+            out << i << ". " << conference.hostNames[i - 1] << endl;
+        }
     }
+    else {
+        out << "This conference does not have a company assigned as host yet!" << endl;
+    }
+    
 
     return out;
 }
@@ -578,20 +587,20 @@ ostream& operator <<(ostream& out, const Conference& conference) {
 // >> overload
 istream& operator >>(istream& in, Conference& conference) {
 
-    cout << "What is this conference's title: ";
+    std::cout << "What is this conference's title: ";
     in >> conference.conferenceTitle;
 
-    cout << "How many attendants do you expect: ";
+    std::cout << "How many attendants do you expect: ";
     in >> conference.expectedAtendees;
 
-    cout << "How long do you think this conference will last: ";
+    std::cout << "How long do you think this conference will last: ";
     in >> conference.duration;
 
-    cout << "How many hosts will this conference have: ";
+    std::cout << "How many hosts will this conference have: ";
     in >> conference.hostNo;
 
     for (int i = 1; i <= conference.hostNo; i++) {
-        cout << "Enter the name of host " << i << ": ";
+        std::cout << "Enter the name of host " << i << ": ";
         string aux;
         in >> aux;
         conference.hostNames.push_back(aux);
@@ -880,16 +889,16 @@ ostream& operator <<(ostream& out, const Calendar& calendar) {
 
 istream& operator >>(istream& in, Calendar& calendar){
 
-    cout << "Enter calendar name: ";
+    std::cout << "Enter calendar name: ";
     in >> calendar.calendarName;
 
-    cout << "Enter event type: ";
+    std::cout << "Enter event type: ";
     in >> calendar.eventType;
 
-    cout << "Enter the month in which the event takes place: ";
+    std::cout << "Enter the month in which the event takes place: ";
     in >> calendar.month;
 
-    cout << "How many days will the event span: ";
+    std::cout << "How many days will the event span: ";
     in >> calendar.noOfDays;
 
     if (calendar.dates != NULL) {
@@ -899,9 +908,9 @@ istream& operator >>(istream& in, Calendar& calendar){
 
     calendar.dates = new int[calendar.noOfDays];
 
-    cout << "Enter the days the event will take place: " << endl;
+    std::cout << "Enter the days the event will take place: " << endl;
     for (int i = 1; i <= calendar.noOfDays; i++) {
-        cout << "Day " << i << ": ";
+        std::cout << "Day " << i << ": ";
         in >> calendar.dates[i-1];
     }
 
@@ -922,8 +931,8 @@ Calendar& Calendar::operator=(const Calendar& calendar){
             delete[] this->dates;
         }
 
-        this->dates = new int[sizeof(calendar.dates)];
-        for (int i = 0; i < sizeof(calendar.dates); i++) {
+        this->dates = new int[calendar.noOfDays];
+        for (int i = 0; i < calendar.noOfDays; i++) {
             this->dates[i] = calendar.dates[i];
         }
     }
@@ -1135,6 +1144,7 @@ public:
     const int getEventID() { return this->eventID; };
     int getExpectedAtendees() { return this->expectedAtendees; };
     int getConferenceNo() { return this->conferenceNo; };
+    int getReservedRooms() { return this->reservedRooms; };
     float getSpan() { return this->span; };
     char* getEventName() { return this->eventName; };
 
@@ -1147,6 +1157,7 @@ public:
     // setters 
     void setExpectedAtendees(int expectedAtendees) { this->expectedAtendees = expectedAtendees; };
     void setConferenceNo(int conferenceNo) { this->conferenceNo = conferenceNo; };
+    void setReservedRooms(int reservedRooms) { this->reservedRooms = reservedRooms; };
     void setSpan(float span) { this->span = span; };
     void setEventName(char* eventName);
 
@@ -1207,7 +1218,6 @@ Event::Event() :eventID(countEvent++) {
     this->eventName = new char[strlen("New Event") + 1];
     strcpy(this->eventName, "New Event");
 
-    // TODO alter values
     this->hostCompany = NULL;
     this->attendingCompanies = NULL;
     this->eventRooms = NULL;
@@ -1223,7 +1233,6 @@ Event::Event(int conferenceNo, char* eventName) :eventID(countEvent++) {
     this->eventName = new char[strlen(eventName) + 1];
     strcpy(this->eventName, eventName);
 
-    // TODO alter values
     this->hostCompany = new Company[1];
     this->attendingCompanies = NULL;
     this->eventRooms = new EventRoom[50];
@@ -1239,7 +1248,6 @@ Event::Event(char* eventName) :eventID(countEvent++) {
     this->eventName = new char[strlen(eventName) + 1];
     strcpy(this->eventName, eventName);
 
-    // TODO alter values
     this->hostCompany = new Company[1];
     this->attendingCompanies = new Company[20];
     this->eventRooms = new EventRoom[50];
@@ -1323,13 +1331,13 @@ Event& Event::operator=(const Event& event) {
 
 // overload input
 istream& operator>>(istream& in, Event& event) {
-    cout << "How many attendants do you expect: ";
+    std::cout << "How many attendants do you expect: ";
     in >> event.expectedAtendees;
 
-    cout << "How many conferences do you want to host: ";
+    std::cout << "How many conferences do you want to host: ";
     in >> event.conferenceNo;
 
-    cout << "How long do you expect to hold your event: ";
+    std::cout << "How long do you expect to hold your event: ";
     in >> event.span;
 
     if (event.eventName != NULL) {
@@ -1338,12 +1346,12 @@ istream& operator>>(istream& in, Event& event) {
     }
 
     char aux[50];
-    cout << "What is the event name: ";
+    std::cout << "What is the event name: ";
     in >> aux;
     event.eventName = new char[strlen(aux) + 1];
     strcpy(event.eventName, aux);
 
-    cout << endl;
+    std::cout << endl;
     return in;
 }
 
@@ -1353,7 +1361,12 @@ ostream& operator<<(ostream& out, const Event& event) {
     out << "This event will have a numer of " << event.conferenceNo << " conferences." << endl;
     out << "The event is expected to last a number of " << event.span << " days." << endl;
     out << "The event is called " << event.eventName << "." << endl;
-    out << "The event is hosted by " << event.hostCompany->getCompanyName() << "." << endl;
+    if (event.hostCompany != NULL) {
+        out << "The event is hosted by " << event.hostCompany->getCompanyName() << "." << endl;
+    }
+    else {
+        out << "This event does not have a company assigned as host yet!" << endl;
+    }
 
     return out;
 }
@@ -1577,198 +1590,447 @@ Event Event::operator-(const Event& event) {
 
 
 int main() {
-    
-    int* x = new int[2];
-    x[0] = 1;
-    x[1] = 3;
-    int* y = new int[3];
-    y[0] = 1;
-    y[1] = 2;
-    y[2] = 3;
-    int* z = new int[4];
-    z[0] = 1;
-    z[1] = 3;
-    z[2] = 5;
-    z[2] = 7;
 
-    Calendar ca1("Calendar 1", "Programming", "May", 2, x);
-    Calendar ca2("Calendar 2", "Programming2", "June", 3, y);
-    Calendar ca3("Calendar 3", "Programming3", "August", 4, z);
+    std::cout << "Welcome to event planner!" << endl;
+    std::cout << "The instruction to be used is written between round braces, as in the following example: (your_command_here)." << endl << endl;
+    std::cout << "Please enter one of the following instructions: " << endl;
+    std::cout << "1. Create (create)" << endl;
+    std::cout << "2. Read (read)" << endl;
+    std::cout << "3. Update (update)" << endl;
+    std::cout << "4. Print (print)" << endl;
+    std::cout << "5. Quit (quit)" << endl;
+    string input = "";
+    std::cin >> input;
+    std::transform(input.begin(), input.end(), input.begin(), ::tolower);
 
-
-    //(bool hosting, string companyName, int representativeNo, vector <string> representatives)
-    Company c1(true,"Armada",3,{"Daniel","Petru","Alexandru"});
-    Company c2(true,"QuikSolv",2,{"Dana","Damian"});
-    Company c3(true,"TerBonna",5,{"Cristian","Eduard","Flavia", "Fabiana", "Emma"});
-    //cout << c1 << c2 << c3;
-    // la conference string cast nu are sens!
-    
-    // int expectedAtendees, float duration, string conferenceTitle, Company* hostingCompany, int hostNo, vector <string> hostNames)
-    Conference co1(25,3.5,"Programare etica",&c3,2,{"Cristian", "Fabiana"});
-    Conference co2(40, 2, "E-Government", &c2, 2, {"Dana", "Damian"});
-    Conference co3(25,3.5,"Programare etica",&c3,2,{"Eduard", "Emma"});
-    Conference co4(50, 4, "Programare functionala", &c1, 2, { "Daniel", "Alexandru" });
-
-    //EventRoom er1("Skip Room", 200, 'A', 3, {"Aer conditionat", "Dozatoare", "Fierbator de apa"});
-    //EventRoom er2("Electrify Room", 180, 'B', 3, {"Aer conditionat", "Dozatoare", "Fierbator de apa"});
-    //EventRoom er3("Darwin Solenza Room", 320, 'D', 4, {"Aer conditionat", "Dozatoare", "Fierbator de apa", "Extinctor"});
-    cout << co1 + co3;
-    // string calendarName, string eventType, string month, int noOfDays, int* dates 
+    int ptrEvent = 0, ptrCompany = 0, ptrER = 0, ptrConf = 0, ptrCal = 0;
+    Event** Events = new Event*[10];
+    Company** Companies = new Company*[10];
+    EventRoom** EventRooms = new EventRoom*[10];
+    Conference** Conferences = new Conference*[10];
+    Calendar** Calendars = new Calendar*[10];
+    for (int i = 0; i < 10; i++) {
+        Events[i] = new Event;
+        Companies[i] = new Company;
+        EventRooms[i] = new EventRoom;
+        Conferences[i] = new Conference;
+        Calendars[i] = new Calendar;
+    }
 
     
+    while (input != "quit") {
+        
+        if (input == "create") {
 
-    /*char* aux = new char[strlen("Etica in programare si introducere in E-Government") + 1];
-    strcpy(aux, "Etica in programare si introducere in E-Government");*/
+            while (input != "continue") {
 
-    //Event e1(500,3,3,13.5,aux);
-    //Company* cl = new Company[3];
-    //cl[0] = c1; 
-    //cl[1] = c2; 
-    //cl[2] = c3;
-    //EventRoom* erl = new EventRoom[3];
-    //erl[0] = er1;
-    //erl[1] = er2;
-    //erl[2] = er3;
-    //Conference* col = new Conference[3];
-    //col[0] = co1;
-    //col[1] = co2;
-    //col[2] = co3;
-    //e1.createEvent(&c3,cl,erl,NULL,col);
+                std::cout << "1. Create event (create_event) (" << 10 - ptrEvent << " left)" << endl;
+                std::cout << "2. Create company (create_company) (" << 10 - ptrCompany << " left)" << endl;
+                std::cout << "3. Create event room (create_eventroom) (" << 10 - ptrER << " left)" << endl;
+                std::cout << "4. Create conference (create_conference) (" << 10 - ptrConf << " left)" << endl;
+                std::cout << "5. Create calendar (create_calendar) (" << 10 - ptrCal << " left)" << endl;
+                std::cout << "6. Continue to other instructions (continue)" << endl;
+                std::cin >> input;
+                std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+                
 
-    //Event e2;
-    //e2 = e1;
-    //cout << (string)(e1 + e2);
-    //cout << (string)e2;
-    //cout << (string)e1;
+                if (input == "create_event") {
+                    if (ptrEvent < 10){
+                        Event aux;
+                        *Events[ptrEvent++] = aux;
+                    }
+                    else {
+                        std::cout << "No more room for events!" << endl;
+                    }
+                }
+                else if (input == "create_company") {
+                    if (ptrCompany < 10){
+                        Company aux;
+                        *Companies[ptrCompany++] = aux;
+                    }
+                    else {
+                        std::cout << "No more room for companies!" << endl;
+                    }
+                }
+                else if (input == "create_eventroom") {
+                    if (ptrER < 10){
+                        EventRoom aux;
+                        *EventRooms[ptrER++] = aux;
+                    }
+                    else {
+                        std::cout << "No more room for event rooms!" << endl;
+                    }
+                }
+                else if (input == "create_conference") {
 
-    //co1.setHostingCompany(nullptr);
-    //cout << (string)co1;
-    //
-    //Event e3;
-    ////cout << (string)e3;
+                    if (ptrEvent < 10) {
+                        Conference aux;
+                        *Conferences[ptrConf++] = aux;
+                    }
+                    else {
+                        std::cout << "No more room for conferences!" << endl;
+                    }
+                }
+                else if (input == "create_calendar") {
+                    if (ptrCal < 10){
+                        Calendar aux;
+                        *Calendars[ptrCal++] = aux;
+                    }
+                    else {
+                        std::cout << "No more room for calendars!" << endl;
+                    }
+                }
+                else if (input != "continue") {
+                    std::cout << "Unknown command. Please try again!" << endl;
+                }
+            }
+
+        }
+        else if (input == "read") {
+            while (input != "continue") {
+                int pos = 0;
+
+                std::cout << "1. Read event (read_event)" << endl;
+                std::cout << "2. Read company (read_company)" << endl;
+                std::cout << "3. Read event room (read_eventroom)" << endl;
+                std::cout << "4. Read conference (read_conference)" << endl;
+                std::cout << "5. Read calendar (read_calendar)" << endl;
+                std::cout << "6. Continue to other instructions (continue)" << endl;
+                std::cin >> input;
+                std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+
+                if (input == "read_event") {
+                    if (0 < ptrEvent) {
+                        std::cout << "Choose the index: 1 -> " << ptrEvent << ": ";
+                        std::cin >> pos;
+                        if (0 < pos && pos <= ptrEvent) {
+                            std::cin >> *(Events[pos - 1]);
+                        }
+                        else {
+                            std::cout << "Invalid index! Try again!" << endl;
+                        }
+                    }
+                    else {
+                        std::cout << "You should create an event first!" << endl;
+                    }
+
+                }
+                else if (input == "read_company") {
+                    if (0 < ptrCompany) {
+                        std::cout << "Choose the index: 1 -> " << ptrCompany << ": ";
+                        std::cin >> pos;
+                        if (0 < pos && pos <= ptrCompany) {
+                            std::cin >> *(Companies[pos - 1]);
+                        }
+                        else {
+                            std::cout << "Invalid index! Try again!" << endl;
+                        }
+                    }
+                    else {
+                        std::cout << "You should create a company first!" << endl;
+                    }
+                }
+                else if (input == "read_eventroom") {
+                    if (0 < ptrER) {
+                        std::cout << "Choose the index: 1 -> " << ptrER << ": ";
+                        std::cin >> pos;
+                        if (0 < pos && pos <= ptrER) {
+                            std::cin >> *(EventRooms[pos - 1]);
+                        }
+                        else {
+                            std::cout << "Invalid index! Try again!" << endl;
+                        }
+                    }
+                    else {
+                        std::cout << "You should create an event room first!" << endl;
+                    }
+                }
+                else if (input == "read_conference") {
+                    if (0 < ptrConf) {
+                        std::cout << "Choose the index: 1 -> " << ptrConf << ": ";
+                        std::cin >> pos;
+                        if (0 < pos && pos <= ptrConf) {
+                            std::cin >> *(Conferences[pos - 1]);
+                        }
+                        else {
+                            std::cout << "Invalid index! Try again!" << endl;
+                        }
+                    }
+                    else {
+                        std::cout << "You should create a conference first!" << endl;
+                    }
+                }
+                else if (input == "read_calendar") {
+                    if (0 < ptrCal) {
+                        std::cout << "Choose the index: 1 -> " << ptrCal << ": ";
+                        std::cin >> pos;
+                        if (0 < pos && pos <= ptrCal) {
+                            std::cin >> *(Calendars[pos - 1]);
+                        }
+                        else {
+                            std::cout << "Invalid index! Try again!" << endl;
+                        }
+                    }
+                    else {
+                        std::cout << "You should create a calendar first!" << endl;
+                    }
+                }
+                else if (input != "continue") {
+                    std::cout << "Unknown command. Please try again!" << endl;
+                }
+            }
+        }
+        else if (input == "update") {
+            while (input != "continue") {
+
+                std::cout << "1. Link structures to an event (link_to_event)" << endl;
+                std::cout << "2. Link host company to conference (link_to_conference);" << endl;
+                std::cout << "3. Continue to other instructions (continue)" << endl;
+                std::cin >> input;
+                std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+
+                if (input == "link_to_event") {
+                    int ptr = 0;
+                    cout << "Choose the event! (1 -> " << ptrEvent << "): ";
+                    cin >> ptr;
+                    if (0 < ptr && ptr <= ptrEvent) {
+                        int ptr2 = 0;
+                        cout << "Your event needs a host. Choose one of the following: ";
+                        for (int i = 1; i <= ptrCompany; i++) {
+                            if (Companies[i - 1]->getHosting() == true) cout << i << " ";
+                        }
+                        cin >> ptr2;
+                        if (Companies[ptr2 - 1]->getHosting() == true) {
+                            Events[ptr - 1]->setHostCompany(Companies[ptr2-1]);
+                        }
+                        else {
+                            cout << "Please try again!" << endl;
+                        }
+
+                        ptr2 = 0;
+                        cout << "Your event needs " << Events[ptr - 1]->getExpectedAtendees() << " attending companies. Choose from the following : ";
+                        for (int i = 1; i <= ptrCompany; i++) {
+                            cout << i << " ";
+                        }
+                        Company* lista = new Company[Events[ptr - 1]->getExpectedAtendees()];
+                        for (int i = 0; i < Events[ptr - 1]->getExpectedAtendees(); i++) {
+                            cin >> ptr2;
+                            if (0 < ptr2 && ptr2 <= Events[ptr - 1]->getExpectedAtendees()) {
+                                lista[i] = *Companies[ptr2 - 1];
+                            }
+                            else {
+                                cout << "Please try again!" << endl;
+                                i--;
+                            }
+                        }
+
+
+                        // TODO check if it keeps working
+                        Events[ptr - 1]->setAttendingCompanies(lista);
+
+
+                        //eventrooms
+                        ptr2 = 0;
+                        cout << "Your event needs " << Events[ptr - 1]->getReservedRooms() << " attending companies. Choose from the following : ";
+                        for (int i = 1; i <= ptrER; i++) {
+                            cout << i << " ";
+                        }
+                        EventRoom* lista2 = new EventRoom[Events[ptr - 1]->getReservedRooms()];
+                        for (int i = 0; i < Events[ptr - 1]->getReservedRooms(); i++) {
+                            cin >> ptr2;
+                            if (0 < ptr2 && ptr2 <= Events[ptr - 1]->getReservedRooms()) {
+                                lista2[i] = *EventRooms[ptr2 - 1];
+                            }
+                            else {
+                                cout << "Please try again!" << endl;
+                                i--;
+                            }
+                        }
+
+
+                        // TODO check if it keeps working
+                        Events[ptr - 1]->setEventRooms(lista2);
+
+
+                        //conferences
+                        ptr2 = 0;
+                        cout << "Your event needs " << Events[ptr - 1]->getConferenceNo() << " conferences. Choose from the following : ";
+                        for (int i = 1; i <= ptrConf; i++) {
+                            cout << i << " ";
+                        }
+                        Conference* lista3 = new Conference[Events[ptr - 1]->getConferenceNo()];
+                        for (int i = 0; i < Events[ptr - 1]->getConferenceNo(); i++) {
+                            cin >> ptr2;
+                            if (0 < ptr2 && ptr2 <= Events[ptr - 1]->getConferenceNo()) {
+                                lista3[i] = *Conferences[ptr2 - 1];
+                            }
+                            else {
+                                cout << "Please try again!" << endl;
+                                i--;
+                            }
+                        }
+
+                        Events[ptr - 1]->setConferences(lista3);
+
+                        // calendar
+                        ptr2 = 0;
+                        cout << "Your event needs a calendar! Choose from the following : ";
+                        for (int i = 1; i <= ptrCal; i++) {
+                            cout << i << " ";
+                        }
+                        Calendar* lista4 = new Calendar[1];
+                        cin >> ptr2;
+                        if (0 < ptr2 && ptr2 <= ptrCal) {
+                            lista4[0] = *Calendars[ptr2 - 1];
+                        }
+                        else {
+                            cout << "Please try again!" << endl;
+                        }
+
+
+                        // TODO check if it keeps working
+                        Events[ptr - 1]->setCalendar(lista4);
+                    }
+                    else {
+                        cout << "Please try again!" << endl;
+                    }
+                }
+                else if (input == "link_to_conference") {
+                    int ptr = 0;
+                    cout << "Choose the conference! (1 -> " << ptrConf << "): ";
+                    cin >> ptr;
+                    if (0 < ptr && ptr <= ptrConf) {
+                        int ptr2 = 0;
+                        cout << "Your conference needs a company. Choose one of the following: ";
+                        for (int i = 1; i <= ptrCompany; i++) {
+                            cout << i << " ";
+                        }
+                        cin >> ptr2;
+                        if (0 < ptr2 && ptr2 <= ptrCompany)
+                            Conferences[ptr - 1]->setHostingCompany(Companies[ptr2 - 1]);
+                        else
+                            cout << "Please try again!" << endl;
+                    }
+                    else {
+                        cout << "Please try again!" << endl;
+                    }
+                }
+                else if (input != "continue") {
+                    std::cout << "Unknown command. Please try again!" << endl;
+                }
+
+            }
+        }
+        else if (input == "print") {
+            while (input != "continue") {
+            int pos = 0;
+
+                std::cout << "1. Print event (print_event)" << endl;
+                std::cout << "2. Print company (print_company)" << endl;
+                std::cout << "3. Print event room (print_eventroom)" << endl;
+                std::cout << "4. Print conference (print_conference)" << endl;
+                std::cout << "5. Print calendar (print_calendar)" << endl;
+                std::cout << "6. Continue to other instructions (continue)" << endl;
+                std::cin >> input;
+                std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+
+                if (input == "print_event") {
+                    if (0 < ptrEvent) {
+                        std::cout << "Choose the index: 1 -> " << ptrEvent << ": ";
+                        std::cin >> pos;
+                        if (0 < pos && pos <= ptrEvent) {
+                            std::cout << *(Events[pos - 1]);
+                        }
+                        else {
+                            std::cout << "Invalid index! Try again!" << endl;
+                        }
+                    }
+                    else {
+                        std::cout << "You should create an event first!" << endl;
+                    }
+
+                }
+                else if (input == "print_company") {
+                    if (0 < ptrCompany) {
+                        std::cout << "Choose the index: 1 -> " << ptrCompany << ": ";
+                        std::cin >> pos;
+                        if (0 < pos && pos <= ptrCompany) {
+                            std::cout << *(Companies[pos - 1]);
+                        }
+                        else {
+                            std::cout << "Invalid index! Try again!" << endl;
+                        }
+                    }
+                    else {
+                        std::cout << "You should create a company first!" << endl;
+                    }
+                }
+                else if (input == "print_eventroom") {
+                    if (0 < ptrER) {
+                        std::cout << "Choose the index: 1 -> " << ptrER << ": ";
+                        std::cin >> pos;
+                        if (0 < pos && pos <= ptrER) {
+                            std::cout << *(EventRooms[pos - 1]);
+                        }
+                        else {
+                            std::cout << "Invalid index! Try again!" << endl;
+                        }
+                    }
+                    else {
+                        std::cout << "You should create an event room first!" << endl;
+                    }
+                }
+                else if (input == "print_conference") {
+                    if (0 < ptrConf) {
+                        std::cout << "Choose the index: 1 -> " << ptrConf << ": ";
+                        std::cin >> pos;
+                        if (0 < pos && pos <= ptrConf) {
+                            std::cout << *(Conferences[pos - 1]);
+                        }
+                        else {
+                            std::cout << "Invalid index! Try again!" << endl;
+                        }
+                    }
+                    else {
+                        std::cout << "You should create a conference first!" << endl;
+                    }
+                }
+                else if (input == "print_calendar") {
+                    if (0 < ptrCal) {
+                        std::cout << "Choose the index: 1 -> " << ptrCal << ": ";
+                        std::cin >> pos;
+                        if (0 < pos && pos <= ptrCal) {
+                            std::cout << *(Calendars[pos - 1]);
+                        }
+                        else {
+                            std::cout << "Invalid index! Try again!" << endl;
+                        }
+                    }
+                    else {
+                        std::cout << "You should create a calendar first!" << endl;
+                    }
+                }
+                else if (input != "continue") {
+                    std::cout << "Unknown command. Please try again!" << endl;
+                }
+            }
+        }
+        else if (input != "quit") {
+            std::cout << "Unknown command. Please try again!" << endl;
+        }
+
+        std::cout << "Please enter one of the following instructions: " << endl;
+        std::cout << "1. Create (create)" << endl;
+        std::cout << "2. Read (read)" << endl;
+        std::cout << "3. Update (update)" << endl;
+        std::cout << "4. Print (print)" << endl;
+        std::cout << "5. Quit (quit)" << endl;
+
+        std::cin >> input;
+        std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+    }
     
+    std::cout << "Thank you for using our app!" << endl;
 
-    cout << "Compileaza. GG." << endl;
     return 0;
-
-    //e1.createEvent(&c3,{&c1,&c2,&c3},{&er1,&er2,&er3},NULL,{&co1,&co2,&co3});
-
-    /*cout << er1;
-    cout << er2;
-    cout << 330 - er3;*/
-
-    /*cout << co1;
-    co1 = co1 + "Ioana";
-    cout << co1;
-    co1 = co1 - "Cristian";
-    cout << co1;*/
-
-    /*cout << co2;
-    co2 = "Iulian" + co2;
-    cout << co2;
-    co2 = "Dana" - co2;
-    cout << co2;*/
-    //cout << (co1 + co3);
-
-
-    
-
-
-    /*Conference c1, c2;
-    Event e1;
-    e1 = e1 + c1;
-    cout << e1;*/
-
-    //cout << "Welcome to event planner v0.31rc4" << endl;
-    //cout << "At any time you can quit by typing (quit)." << endl;
-    //cout << "The instruction to be used is written between round braces, as in the following example: (your_command_here)." << endl << endl;
-
-    //cout << "Please enter one of the following instructions to begin: " << endl;
-    //cout << "1. Create event (create_event);" << endl;
-    //cout << "2. Create company (create_company);" << endl;
-    //cout << "3. Create event room (create_eventroom);" << endl;
-    //cout << "4. Create conference (create_conference);" << endl;
-    //cout << "5. Create calendar (create_calendar);" << endl;
-    //cout << "6. Continue to data printing (continue)" << endl;
-    //string input = "";
-
-    //// TODO cum aloc dinamic crearea de clase?
-    //Event* Events = new Event[10];
-    //Company* Companies = new Company[10];
-    //EventRoom* EventRooms = new EventRoom[10];
-    //Conference* Conferences = new Conference[10];
-    //Calendar* Calendars = new Calendar[10];
-
-    //cin >> input;
-    //std::transform(input.begin(), input.end(), input.begin(), ::tolower);
-    //while (input != "quit") {
-    //    
-    //    if (input == "create") {
-    //        while (input != "continue") {
-    //            // TODO o fi bine sa am valori constante aici?
-    //            if (input == "create_event") {
-    //                const int ptr = Events->getEventID();
-    //                cin >> Events[ptr - 10];
-    //            }
-    //            else if (input == "create_company") {
-    //                const int ptr = Companies->getCompanyID();
-    //                cin >> Companies[ptr - 100];
-    //            }
-    //            else if (input == "create_eventroom") {
-    //                const int ptr = EventRooms->getRoomNo();
-    //                cin >> EventRooms[ptr - 200];
-    //            }
-    //            else if (input == "create_conference") {
-    //                const int ptr = Conferences->getConferenceID();
-    //                cin >> Conferences[ptr - 1000];
-    //            }
-    //            else if (input == "create_calendar") {
-    //                const int ptr = Calendars->getCalendarID();
-    //                cin >> Calendars[ptr - 10000];
-    //            }
-    //        }
-    //    }
-    //    else if (input == "read") {
-    //        while (input != "continue") {
-    //            input = "";
-
-    //            cout << "Next, you can " << endl << endl;
-
-    //            cout << "Please enter one of the following instructions to begin: " << endl;
-    //            cout << "1. Create event (create_event);" << endl;
-    //            cout << "2. Create company (create_company);" << endl;
-    //            cout << "3. Create event room (create_eventroom);" << endl;
-    //            cout << "4. Create conference (create_conference);" << endl;
-    //            cout << "5. Create calendar (create_calendar);" << endl;
-    //            cout << "6. Continue to data printing (continue)" << endl;
-
-    //            while (input != "continue") {
-    //                cout << "hello!";
-
-    //                cin >> input;
-    //                std::transform(input.begin(), input.end(), input.begin(), ::tolower);
-    //            }
-    //        }
-    //    }
-    //    else if (input == "update") {
-    //        while (input != "continue") {
-
-    //        }
-    //    }
-    //    else if (input == "delete") {
-    //        while (input != "continue") {
-
-    //        }
-    //    }
-    //    else {
-    //        cout << "Unknown command! Please try again!" << endl;
-    //    }
-
-    //    cin >> input;
-    //    std::transform(input.begin(), input.end(), input.begin(), ::tolower);
-    //}
-    //
-    //cout << "Thank you for using our app!" << endl;
-
-    
 }
