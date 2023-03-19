@@ -1,9 +1,6 @@
 //CORPORATE EVENT MANAGER - PROJECT WRITTEN BY ALEXANDRU MICLEA
 //FMI UNIBUC 2023
 
-// TODO BIG
-// menu & functionality
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -18,11 +15,6 @@ class Event;
 class EventRoom;
 class Calendar;
 class Conference;
-
-
-// TODO Company
-// functionality
-
 
 class Company {
 private:
@@ -69,6 +61,7 @@ public:
     Company* operator*(int); // *overload
     friend Company* operator*(int, Company); // * overload
     operator string(); // string cast
+    void printCompany();
 
 };
 
@@ -239,8 +232,9 @@ Company* operator*(int x, Company company) {
     return ans;
 }
 
-// TODO EventRoom
-// functionality
+void Company::printCompany() {
+    cout << *this;
+}
 
 
 class EventRoom {
@@ -293,6 +287,7 @@ public:
     EventRoom operator-(int); // - overload 
     friend EventRoom operator-(int, EventRoom); // comutative -
     friend EventRoom operator+(int, EventRoom); // comutative +
+    void printEventRoom();
 
 };
 
@@ -469,9 +464,9 @@ EventRoom operator+(int newSeats, EventRoom eventRoom) {
     return aux;
 }
 
-// TODO conference
-// functionality
-
+void EventRoom::printEventRoom() {
+    cout << *this;
+}
 
 class Conference {
 private:
@@ -526,6 +521,7 @@ public:
     friend Conference operator+(string, Conference); // + commutative
     friend Conference operator-(string, Conference); // - commutative
     Conference operator+(const Conference&); // addition
+    void printConference();
 
 };
 
@@ -741,7 +737,10 @@ Conference Conference::operator+(const Conference& conference) {
     }
 }
 
-// todo functionality
+void Conference::printConference() {
+    cout << *this;
+}
+
 class Calendar {
 private:
 
@@ -789,7 +788,7 @@ public:
     friend Calendar operator+(int, Calendar); // + comutativ
     bool operator==(const Calendar&); // == overload
     bool operator<(const Calendar&); // < overload
-
+    void printCalendar();
     operator string(); // string cast
 };
 
@@ -1116,6 +1115,10 @@ Calendar operator+(int x, Calendar calendar) {
     ans.dates[ans.noOfDays - 1] = x;
 
     return ans;
+}
+
+void Calendar::printCalendar() {
+    cout << *this;
 }
 
 class Event {
@@ -1825,7 +1828,6 @@ int main() {
                         }
 
 
-                        // TODO check if it keeps working
                         Events[ptr - 1]->setAttendingCompanies(lista);
 
 
@@ -1848,7 +1850,6 @@ int main() {
                         }
 
 
-                        // TODO check if it keeps working
                         Events[ptr - 1]->setEventRooms(lista2);
 
 
@@ -1888,7 +1889,6 @@ int main() {
                         }
 
 
-                        // TODO check if it keeps working
                         Events[ptr - 1]->setCalendar(lista4);
                     }
                     else {
