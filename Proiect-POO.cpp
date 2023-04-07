@@ -2036,5 +2036,10 @@ int main() {
     
     std::cout << "Thank you for using our app!" << endl;
 
+    delete[] Events;
+    delete[] Companies;
+    delete[] EventRooms;
+    delete[] Conferences;
+    delete[] Calendars;
     return 0;
 }
