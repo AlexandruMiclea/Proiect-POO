@@ -2036,10 +2036,12 @@ int main() {
     
     std::cout << "Thank you for using our app!" << endl;
 
-    delete[] Events;
-    delete[] Companies;
-    delete[] EventRooms;
-    delete[] Conferences;
-    delete[] Calendars;
+    for (int i = 0; i < 10; i++) {
+        delete Events[i];
+        delete Companies[i];
+        delete EventRooms[i];
+        delete Conferences[i];
+        delete Calendars[i];
+    }
     return 0;
 }
