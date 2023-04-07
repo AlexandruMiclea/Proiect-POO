@@ -2043,5 +2043,10 @@ int main() {
         delete Conferences[i];
         delete Calendars[i];
     }
+    delete[] Events;
+    delete[] Companies;
+    delete[] EventRooms;
+    delete[] Conferences;
+    delete[] Calendars;
     return 0;
 }
