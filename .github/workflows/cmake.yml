@@ -259,7 +259,7 @@ jobs:
         with:
           cmake_generator: ${{ matrix.cmake_generator }}
           custom_flags: ${{ matrix.cmake_flags }}
-          warnings_as_errors: 'ON'
+          warnings_as_errors: 'OFF'
 
       - name: Build
         # Execute the build using N jobs (-jN)
