@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <vector>
 #include <algorithm>
 using namespace std;
@@ -1231,6 +1232,7 @@ Event::Event() :eventID(countEvent++) {
 // partial constructor 1
 Event::Event(int conferenceNo, char* eventName) :eventID(countEvent++) {
     this->expectedAtendees = 0;
+    this->reservedRooms = 0;
     this->conferenceNo = conferenceNo;
     this->span = 0;
     this->eventName = new char[strlen(eventName) + 1];
@@ -1247,6 +1249,7 @@ Event::Event(int conferenceNo, char* eventName) :eventID(countEvent++) {
 Event::Event(char* eventName) :eventID(countEvent++) {
     this->expectedAtendees = 0;
     this->conferenceNo = 0;
+    this->reservedRooms = 0;
     this->span = 0;
     this->eventName = new char[strlen(eventName) + 1];
     strcpy(this->eventName, eventName);
