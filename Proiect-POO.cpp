@@ -382,6 +382,7 @@ istream& operator >>(istream& in, EventRoom& eventRoom) {
 EventRoom& EventRoom::operator=(const EventRoom& eventRoom){
 
     if (this != &eventRoom) {
+        this->noOfFacilities = eventRoom.noOfFacilities;
         this->roomName = eventRoom.roomName;
         this->seatNo = eventRoom.seatNo;
         this->pavilion = eventRoom.pavilion;
