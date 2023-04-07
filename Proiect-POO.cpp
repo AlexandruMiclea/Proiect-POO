@@ -1264,7 +1264,9 @@ Event::Event(char* eventName) :eventID(countEvent++) {
 
 // destructor
 Event::~Event() {
-    this->eventName = NULL;
+    if (this->eventName != NULL) {
+        delete[] this->eventName;
+    }
     this->hostCompany = NULL;
     this->attendingCompanies = NULL;
     this->eventRooms = NULL;
