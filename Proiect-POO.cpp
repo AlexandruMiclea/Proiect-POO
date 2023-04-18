@@ -64,13 +64,13 @@ public:
     // d, virtual in case I randomly delete a derived class using a pointer to base
     virtual ~Advertisement() {}
     // write
-    ostream& afisare(ostream& out) {
+    virtual ostream& afisare(ostream& out) {
         out << "The budget is " << this->budget << " dollars" << endl;
         out << "The target audience is " << this->targetAudience << endl;
         return out;
     }
     // read
-    istream& citire(istream& in) {
+    virtual istream& citire(istream& in) {
         cout << "What is the budget?";
         in >> this->budget; 
         cout << "What is the target audience?";
@@ -100,37 +100,150 @@ public:
         this->platform = obj.platform;
     }
     // = op
+    OnlineAd& operator=(const OnlineAd& obj) {
+        if (this != &obj) {
+            Advertisement::operator=(obj);
+            this->platform = obj.platform;
+            this->length = obj.length;
+        }
+        return *this;
+    }
     // d
     virtual ~OnlineAd() {}
     // read
+    virtual istream& citire(istream& in) {
+        Advertisement::citire(in);
+        cout << "What will be the length of this add?";
+        in >> this->length;
+        cout << "On what plathorm will you play this add?";
+        in >> this->platform;
+
+        return in;
+    }
     // write
+    virtual ostream& afisare(ostream& out) {
+        Advertisement::afisare(out);
+        out << "The length of the ad is " << this->length << " dollars" << endl;
+        out << "The platform we will play this ad on is " << this->platform << endl;
+
+        return out;
+    }
     // present
+    virtual void present() {
+        cout << "This online ad is made with love for you <3";
+        //cout << *this;
+    }
 };
 
 class PhysicalAd : public virtual Advertisement {
-
+protected:
+    float size;
+    string printCompany;
 public:
     // empty c
+    PhysicalAd() {
+        this->size = 0.0f;
+        this->printCompany = "";
+    }
     // param c
+    PhysicalAd(string targetAudience, int budget, float size, string printCompany) :Advertisement(targetAudience, budget) {
+        this->size = size;
+        this->printCompany = printCompany;
+    }
     // cc
+    PhysicalAd(const PhysicalAd& obj) :Advertisement(obj) {
+        this->size = obj.size;
+        this->printCompany = obj.printCompany;
+    }
     // = op
+    PhysicalAd& operator=(const PhysicalAd& obj) {
+        if (this != &obj) {
+            Advertisement::operator=(obj);
+            this->printCompany = obj.printCompany;
+            this->size = obj.size;
+        }
+        return *this;
+    }
     // d
+    virtual ~PhysicalAd() {}
     // read
+    virtual istream& citire(istream& in) {
+        Advertisement::citire(in);
+        cout << "What will be the length of this add?";
+        in >> this->size;
+        cout << "On what plathorm will you play this add?";
+        in >> this->printCompany;
+
+        return in;
+    }
     // write
+    virtual ostream& afisare(ostream& out) {
+        Advertisement::afisare(out);
+        out << "The length of the ad is " << this->size << " dollars" << endl;
+        out << "The platform we will play this ad on is " << this->printCompany << endl;
+
+        return out;
+    }
     // present
+    virtual void present() {
+        cout << "This physical ad is made with love for you <3";
+        //cout << *this;
+    }
 };
 
 class Marketing : public OnlineAd, public PhysicalAd {
-
+protected:
+    float duration; // as in days
 public:
     // empty c
+    Marketing() {
+        this->duration = 0.0f;
+    }
     // param c
+    Marketing(string targetAudience, int budget, float length, string platform, float size, string PrintCompany, float duration) :Advertisement(targetAudience, budget), OnlineAd(targetAudience, budget, length, platform), PhysicalAd(targetAudience, budget, size, PrintCompany){
+        this->duration = duration;
+    }
     // cc
+    Marketing(const Marketing& obj) :Advertisement(obj), OnlineAd(obj),PhysicalAd(obj) {
+        this->duration = obj.duration;
+    }
     // = op
+    Marketing& operator=(const Marketing& obj) {
+        if (this != &obj) {
+            OnlineAd::operator=(obj);
+            PhysicalAd::operator=(obj);
+            this->duration = obj.duration;
+        }
+        return *this;
+    }
     // d
+    virtual ~Marketing() {}
     // read
+    virtual istream& citire(istream& in) {
+        OnlineAd::citire(in);
+        cout << "What will be the length of this add?";
+        in >> this->size;
+        cout << "On what plathorm will you play this add?";
+        in >> this->printCompany;
+        cout << "How many days do you want it to span?";
+        in >> this->duration;
+
+        return in;
+    }
     // write
+    virtual ostream& afisare(ostream& out) {
+        OnlineAd::afisare(out);
+        out << "The length of the ad is " << this->size << " dollars" << endl;
+        out << "The platform we will play this ad on is " << this->printCompany << endl;
+        out << "It will be played in the span of " << this->duration << " days" << endl;
+
+        return out;
+    }
     // present
+    virtual void present() {
+        cout << "This physical ad is made with love for you <3";
+        //cout << *this;
+    }
 };
 
 
