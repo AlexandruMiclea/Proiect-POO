@@ -62,7 +62,6 @@ jobs:
                    -i"${EXT_DIR}" --suppress='*:"${EXT_DIR}"/*' \
                    --suppress=missingIncludeSystem \
                    --suppress=unmatchedSuppression \
-                   --suppress=unusedFunction \
                    --suppress=useStlAlgorithm \
                    --error-exitcode=1
 

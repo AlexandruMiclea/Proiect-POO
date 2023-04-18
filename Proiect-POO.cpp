@@ -11,11 +11,130 @@ using namespace std;
 #pragma warning (disable : 4996)
 
 // class declarations
+
+// part 1 classes
 class Company;
-class Event;
+class Event; // Make sure you link the marketing plan here!
 class EventRoom;
 class Calendar;
-class Conference;
+class Conference; // i can do something more with inheritance
+
+// part 2 classes
+
+// functionalities related to marketing the event?
+class Advertisement;
+class OnlineAd;
+class PhysicalAd;
+class Marketing;
+
+// PART 2 CLASSES
+
+class Advertisement {
+protected:
+    string targetAudience;
+    int budget;
+
+    virtual void present() = 0;
+
+public:
+    // empty c
+    Advertisement() {
+        this->budget = 0;
+        this->targetAudience = "";
+    }
+    // param c
+    Advertisement(string targetAudience, int budget) {
+        this->budget = budget;
+        this->targetAudience = targetAudience;
+    }
+    // cc
+    Advertisement(const Advertisement& obj) {
+        this->budget = obj.budget;
+        this->targetAudience = obj.targetAudience;
+    }
+    // = op
+    Advertisement& operator=(const Advertisement& obj) {
+        if (this != &obj) {
+            this->budget = obj.budget;
+            this->targetAudience = obj.targetAudience;
+
+        }
+        return *this;
+    }
+    // d, virtual in case I randomly delete a derived class using a pointer to base
+    virtual ~Advertisement() {}
+    // write
+    ostream& afisare(ostream& out) {
+        out << "The budget is " << this->budget << " dollars" << endl;
+        out << "The target audience is " << this->targetAudience << endl;
+        return out;
+    }
+    // read
+    istream& citire(istream& in) {
+        cout << "What is the budget?";
+        in >> this->budget; 
+        cout << "What is the target audience?";
+        in >> this->targetAudience;
+        return in;
+    }
+};
+
+class OnlineAd : public virtual Advertisement {
+protected:
+    float length;
+    string platform;
+public:
+    // empty c
+    OnlineAd() {
+        this->length = 0.0f;
+        this->platform = "";
+    }
+    // param c
+    OnlineAd(string targetAudience, int budget, float length, string platform):Advertisement(targetAudience, budget) {
+        this->length = length;
+        this->platform = platform;
+    }
+    // cc
+    OnlineAd(const OnlineAd& obj):Advertisement(obj) {
+        this->length = obj.length;
+        this->platform = obj.platform;
+    }
+    // = op
+    // d
+    virtual ~OnlineAd() {}
+    // read
+    // write
+    // present
+};
+
+class PhysicalAd : public virtual Advertisement {
+
+public:
+    // empty c
+    // param c
+    // cc
+    // = op
+    // d
+    // read
+    // write
+    // present
+};
+
+class Marketing : public OnlineAd, public PhysicalAd {
+
+public:
+    // empty c
+    // param c
+    // cc
+    // = op
+    // d
+    // read
+    // write
+    // present
+};
+
+
+// PART 1 CLASSES
 
 class Company {
 private:
@@ -766,7 +885,7 @@ public:
     int* getDates() { return this->dates; };
 
     // setters 
-    void setCalendarName(string calendarNamecalendarName) { this->calendarName = calendarName; };
+    void setCalendarName(string calendarName) { this->calendarName = calendarName; };
     void setEventTypee(string eventType) { this->eventType = eventType; };
     void setMonth(string month) { this->month = month; };
     void setnoOfDays(int noOfDays) { this->noOfDays = noOfDays; };
