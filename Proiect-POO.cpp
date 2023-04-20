@@ -839,10 +839,7 @@ Conference::Conference():conferenceID(countConference++) {
 }
 // destructor
 Conference::~Conference(){
-    //this->hostNames.clear();
-    if (&(this->eventRoom) != NULL) {
-        delete &(this->eventRoom);
-    }
+    hostNames.clear();
 }
 
 // full constructor
