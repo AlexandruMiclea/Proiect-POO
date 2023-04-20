@@ -1528,7 +1528,7 @@ Event::~Event() {
     }
 
     for (auto& x : attendingCompanies) delete x;
-    //for (auto& x : conferences) delete x;
+    for (auto& x : conferences) delete x;
     attendingCompanies.clear();
     conferences.clear();
 }
