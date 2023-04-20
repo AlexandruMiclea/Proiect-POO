@@ -862,7 +862,7 @@ Conference::Conference(const Conference& conference) :conferenceID(countConferen
     this->hostNo = conference.hostNo;
     this->hostNames = conference.hostNames;
 
-    this->eventRoom = EventRoom::EventRoom(conference.eventRoom);
+    this->eventRoom = conference.eventRoom;
 }
 
 // << overload
