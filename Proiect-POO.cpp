@@ -783,8 +783,11 @@ protected:
     float duration;
     string conferenceTitle;
     int hostNo;
+    int adsNo;
     vector <string> hostNames;
     EventRoom eventRoom;
+
+    vector <Advertisement*> ads;
 
 public:
 
@@ -806,7 +809,7 @@ public:
 
     Conference(); // empty constructor
     ~Conference(); // destructor
-    Conference(int expectedAtendees, float duration, string conferenceTitle, Company* hostingCompany, int hostNo, vector <string> hostNames); // full constructor
+    Conference(int expectedAtendees, float duration, string conferenceTitle, Company* hostingCompany, int hostNo, int adsNo, vector <string> hostNames); // full constructor
     Conference(const Conference& conference); // copy constructor
     Conference(int expectedAtendees, float duration, string conferenceTitle, int hostNo, vector <string> hostNames); // partial constructor 1
     Conference(string conferenceTitle); // partial constructor 2
@@ -836,19 +839,24 @@ Conference::Conference():conferenceID(countConference++) {
     this->duration = 0.0f;
     this->conferenceTitle = "New Conference";
     this->hostNo = 0;
+    this->adsNo = 0;
 }
 // destructor
 Conference::~Conference(){
     hostNames.clear();
+
+    for (auto& x : ads) delete x;
+    ads.clear();
 }
 
 // full constructor
-Conference::Conference(int expectedAtendees, float duration, string conferenceTitle, Company* hostingCompany, int hostNo, vector <string> hostNames) :conferenceID(countConference++) {
+Conference::Conference(int expectedAtendees, float duration, string conferenceTitle, Company* hostingCompany, int hostNo, int adsNo, vector <string> hostNames) :conferenceID(countConference++) {
     this->expectedAtendees = expectedAtendees;
     this->duration = duration;
     this->conferenceTitle = conferenceTitle;
     this->hostNo = hostNo;
     this->hostNames = hostNames;
+    this->adsNo = adsNo;
 }
 
 // copy constructor
@@ -857,6 +865,7 @@ Conference::Conference(const Conference& conference) :conferenceID(countConferen
     this->duration = conference.duration;
     this->conferenceTitle = conference.conferenceTitle;
     this->hostNo = conference.hostNo;
+    this->adsNo = adsNo;
     this->hostNames = conference.hostNames;
 
     this->eventRoom = conference.eventRoom;
@@ -870,6 +879,14 @@ ostream& operator <<(ostream& out, const Conference& conference) {
     out << "This conference will last " << conference.duration << " hours." << endl;
     out << "Data about the event room: " << endl;
     out << conference.eventRoom;
+    out << "Data about the ads: " << endl;
+
+    // VIEW POLYMORPHISM EXAMPLE WHEN WRITING
+
+    for (auto& x : conference.ads) {
+        x->present() ;
+        cout << endl;
+    }
 
     return out;
 }
@@ -889,6 +906,9 @@ istream& operator >>(istream& in, Conference& conference) {
     std::cout << "How many hosts will this conference have: ";
     in >> conference.hostNo;
 
+    std::cout << "How many ads will this conference have: ";
+    in >> conference.adsNo;
+
     for (int i = 1; i <= conference.hostNo; i++) {
         std::cout << "Enter the name of host " << i << ": ";
         string aux;
@@ -898,6 +918,39 @@ istream& operator >>(istream& in, Conference& conference) {
 
     std::cout << "Please enter data about the event room: " << endl;
     in >> conference.eventRoom;
+
+    // VIEW POLYMORPHISM EXAMPLE WHEN READING
+
+    std::cout << "Enter data about the ads: " << endl;
+    for (int i = 1; i <= conference.adsNo; i++) {
+        int select = 0;
+        std::cout << "What kind of ad would you like ad " << i << " to be: " << endl;
+        std::cout << "1. Online ad" << endl;
+        std::cout << "2. Newspaper ad" << endl;
+        std::cout << "3. Physical ad" << endl;
+        std::cout << "4. Marketing (all of the above)" << endl;
+        cin >> select;
+        switch (select) {
+            case 1:
+                conference.ads.push_back(new OnlineAd);
+                in >> *conference.ads[i-1];
+                break;
+            case 2:
+                conference.ads.push_back(new NewspaperAd);
+                in >> *conference.ads[i - 1];
+                break;
+            case 3:
+                conference.ads.push_back(new PhysicalAd);
+                in >> *conference.ads[i - 1];
+                break;
+            case 4:
+                conference.ads.push_back(new Marketing);
+                in >> *conference.ads[i - 1];
+                break;
+            default:
+                break;
+        }
+    }
 
     return in;
 }
@@ -1659,8 +1712,8 @@ ostream& operator<<(ostream& out, const Event& event) {
     out << "Data about the program: " << endl;
     out << event.calendar;
     out << "Data about the attending companies: " << endl;
-    for (auto& x : event.attendingCompanies) out << x << endl;
-    for (auto& x : event.conferences) out << x << endl;
+    for (auto& x : event.attendingCompanies) out << *x << endl;
+    for (auto& x : event.conferences) out << *x << endl;
 
     return out;
 }
@@ -2076,100 +2129,36 @@ int main() {
 
         //    }
         //}
-        //else if (input == "print") {
-        //    while (input != "continue") {
-        //    int pos = 0;
+        else if (input == "print" || input == "p") {
+            while (input != "continue") {
+            int pos = 0;
 
-        //        std::cout << "1. Print event (print_event)" << endl;
-        //        std::cout << "2. Print company (print_company)" << endl;
-        //        std::cout << "3. Print event room (print_eventroom)" << endl;
-        //        std::cout << "4. Print conference (print_conference)" << endl;
-        //        std::cout << "5. Print calendar (print_calendar)" << endl;
-        //        std::cout << "6. Continue to other instructions (continue)" << endl;
-        //        std::cin >> input;
-        //        std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+                std::cout << "1. Print event (print_event)" << endl;
+                std::cout << "2. Continue to other instructions (continue)" << endl;
+                std::cin >> input;
+                std::transform(input.begin(), input.end(), input.begin(), ::tolower);
 
-        //        if (input == "print_event") {
-        //            if (0 < ptrEvent) {
-        //                std::cout << "Choose the index: 1 -> " << ptrEvent << ": ";
-        //                std::cin >> pos;
-        //                if (0 < pos && pos <= ptrEvent) {
-        //                    std::cout << *(Events[pos - 1]);
-        //                }
-        //                else {
-        //                    std::cout << "Invalid index! Try again!" << endl;
-        //                }
-        //            }
-        //            else {
-        //                std::cout << "You should create an event first!" << endl;
-        //            }
+                if (input == "print_event" || input == "pe") {
+                    if (0 < Events.size()) {
+                        std::cout << "Choose the index: 1 -> " << Events.size() << ": ";
+                        std::cin >> pos;
+                        if (0 < pos && pos <= Events.size()) {
+                            std::cout << *(Events[pos - 1]);
+                        }
+                        else {
+                            std::cout << "Invalid index! Try again!" << endl;
+                        }
+                    }
+                    else {
+                        std::cout << "You should create an event first!" << endl;
+                    }
 
-        //        }
-        //        else if (input == "print_company") {
-        //            if (0 < ptrCompany) {
-        //                std::cout << "Choose the index: 1 -> " << ptrCompany << ": ";
-        //                std::cin >> pos;
-        //                if (0 < pos && pos <= ptrCompany) {
-        //                    std::cout << *(Companies[pos - 1]);
-        //                }
-        //                else {
-        //                    std::cout << "Invalid index! Try again!" << endl;
-        //                }
-        //            }
-        //            else {
-        //                std::cout << "You should create a company first!" << endl;
-        //            }
-        //        }
-        //        else if (input == "print_eventroom") {
-        //            if (0 < ptrER) {
-        //                std::cout << "Choose the index: 1 -> " << ptrER << ": ";
-        //                std::cin >> pos;
-        //                if (0 < pos && pos <= ptrER) {
-        //                    std::cout << *(EventRooms[pos - 1]);
-        //                }
-        //                else {
-        //                    std::cout << "Invalid index! Try again!" << endl;
-        //                }
-        //            }
-        //            else {
-        //                std::cout << "You should create an event room first!" << endl;
-        //            }
-        //        }
-        //        else if (input == "print_conference") {
-        //            if (0 < ptrConf) {
-        //                std::cout << "Choose the index: 1 -> " << ptrConf << ": ";
-        //                std::cin >> pos;
-        //                if (0 < pos && pos <= ptrConf) {
-        //                    std::cout << *(Conferences[pos - 1]);
-        //                }
-        //                else {
-        //                    std::cout << "Invalid index! Try again!" << endl;
-        //                }
-        //            }
-        //            else {
-        //                std::cout << "You should create a conference first!" << endl;
-        //            }
-        //        }
-        //        else if (input == "print_calendar") {
-        //            if (0 < ptrCal) {
-        //                std::cout << "Choose the index: 1 -> " << ptrCal << ": ";
-        //                std::cin >> pos;
-        //                if (0 < pos && pos <= ptrCal) {
-        //                    std::cout << *(Calendars[pos - 1]);
-        //                }
-        //                else {
-        //                    std::cout << "Invalid index! Try again!" << endl;
-        //                }
-        //            }
-        //            else {
-        //                std::cout << "You should create a calendar first!" << endl;
-        //            }
-        //        }
-        //        else if (input != "continue") {
-        //            std::cout << "Unknown command. Please try again!" << endl;
-        //        }
-        //    }
-        //}
+                }
+                else if (input != "continue") {
+                    std::cout << "Unknown command. Please try again!" << endl;
+                }
+            }
+        }
         else if (input != "quit") {
             std::cout << "Unknown command. Please try again!" << endl;
         }
