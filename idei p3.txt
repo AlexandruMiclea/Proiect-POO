@@ -1,0 +1,37 @@
+- stl
+	- list: ???
+	- vector: x
+	- map: 
+	- set: 
+- r&w file: pentru componentele unui event, citeste din fisier (i.e. schimba pointer-ul pt stdin si stdout sa mearga catre fisiere)
+- singleton menu
+- template class
+- template methods
+- try catch (6 in total, 3 diferite)
+- fiecare clasa:
+	- empty constructor
+	- parameter constructor
+	- copy constructor
+	- = operator
+	- destructor
+	- read
+	- write
+
+DIVERSE
+
+
+- registration class
+- error handling (if a conference speaker did not register, 
+throw an error and handle it accordingly)
+- notifications/reminders (you can output these to files)
+- for the marketing classes define a method to get the outreach value
+- create a method to sort those values and return the best marketing ads
+- implement a set to keep track of the ads and do a method that deletes ads that are not profitable
+- eventroom: check if the room is booked in a set interval. if it is booked tally-ho it's a no no
+- map the dates? so you can better check when you're not ho ho
+
+
+clase:
+// meniu
+// template
+// 3 mosteniri

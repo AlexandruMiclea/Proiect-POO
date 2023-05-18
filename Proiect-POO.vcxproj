@@ -127,7 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="old_Proiect-POO.cpp" />
     <ClCompile Include="Proiect-POO.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="idei p3.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
