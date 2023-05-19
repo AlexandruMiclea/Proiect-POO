@@ -1,9 +1,13 @@
+//ELECTION INTEGRITY CHECKER - PROJECT WRITTEN BY ALEXANDRU MICLEA
+//FMI UNIBUC 2023
+
 #include <iostream>
 #include <vector>
 #include <list>
 #include <set>
 #include <map>
 #include <string>
+#include <algorithm>
 using namespace std;
 
 // abstract class
@@ -41,6 +45,10 @@ public:
 class WrongID : public exception {
 public:
 	const char* what() const throw() { return "CNP-ul introdus nu este valid (varsta prea mica)/numar invalid!\n"; };
+};
+class InsufCandidates : public exception {
+public:
+	const char* what() const throw() { return "Nu sunt suficienti candidati in cursa!\n"; };
 };
 
 // todo template class
@@ -106,6 +114,7 @@ protected:
 
 	bool valideazaVotant(long long cnp) {
 		try {
+			if (!parseID(cnp)) throw WrongID();
 			for (auto& x : invalidV) {
 				if (x == cnp) throw InvalidVoter();
 			}
@@ -114,6 +123,10 @@ protected:
 					throw ExistingVoter();
 				}
 			}
+		}
+		catch (WrongID& wi){
+			cout << wi.what();
+			return false;
 		}
 		catch (ExistingVoter& e) {
 			cout << e.what();
@@ -179,7 +192,7 @@ protected:
 	}
 
 public:
-	virtual void derulareAlegere() = 0;
+	virtual bool derulareAlegere() = 0;
 
 	Alegere() {this->electionRan = false;}
 	Alegere(const Alegere& obj) {
@@ -227,22 +240,22 @@ public:
 		cout << "urmat de lista de candidati. Dupa care se vor exprima dorintele de vot." << endl;
 		long long id = 0;
 		while (true) {
-			cout << "Introduceti CNP-ul votantului (0 pentru a inceta introducerea): " << endl;
+			cout << "Introduceti CNP-ul votantului (enter pentru a inceta introducerea): " << endl;
 			in >> id;
 			if (id == 0) break;
 			if (valideazaVotant(id)) {
-				votant.insert(id);
+				this->votant.insert(id);
 			}
 		}
-		string cand = "o";
+		string cand = "";
+		getline(in, cand); // trebuie pt ca e pretentios 
 		while (true) {
-			cout << "Introduceti numele candidatului (enter pentru a trece peste): " << endl;
-			getline(in, cand); // todo nu merge
-			cout << 'a';
+			cout << "Introduceti numele candidatului (enter pentru a inceta introducerea): " << endl;
+			getline(in, cand);
+			transform(cand.begin(),cand.end(),cand.begin(),[](char c){return tolower(c);}); // view lambda expresii suntem smenari
 			if (cand == "") break;
-			cout << 'b';
 			if (valideazaCandidat(cand)) {
-				candidat.push_back(cand);
+				this->candidat.push_back(cand);
 			}
 		}
 		
@@ -255,15 +268,18 @@ public:
 class Prezidentiale : public Alegere{
 protected:
 	int numarTururi;
+	vector<map<string, float>> rezultateTur;
 	vector <int> turnout; // poz -> turul poz + 1
+
+	bool cmp(pair<string, float>& a, pair<string, float>& b) { return a.second < b.second; };
 
 public:
 	Prezidentiale() {
 		this->numarTururi = 1;
 	};
-	Prezidentiale(const Prezidentiale& obj):Alegere(obj) {this->numarTururi = obj.numarTururi, this->turnout = obj.turnout;};
-	Prezidentiale(set<long long> votant_, set<long long> iv_, list<string> candidat_, list<string> ic_, map<string, vector<long long>> vot_, bool electionRan_, int numarTururi_, vector<int> turnout_):Alegere(votant_, iv_, candidat_, ic_, vot_, electionRan_)
-	{this->numarTururi = numarTururi_, this->turnout = turnout_;};
+	Prezidentiale(const Prezidentiale& obj):Alegere(obj) {this->numarTururi = obj.numarTururi, this->rezultateTur = obj.rezultateTur, this->turnout = obj.turnout;};
+	Prezidentiale(set<long long> votant_, set<long long> iv_, list<string> candidat_, list<string> ic_, map<string, vector<long long>> vot_, bool electionRan_, int numarTururi_, vector<map<string, float>> rezultateTur_, vector<int> turnout_):Alegere(votant_, iv_, candidat_, ic_, vot_, electionRan_)
+	{this->numarTururi = numarTururi_, this->rezultateTur = rezultateTur_, this->turnout = turnout_;};
 
 	Prezidentiale& operator=(const Prezidentiale& obj) {
 		if (this != &obj) {
@@ -291,22 +307,66 @@ public:
 	virtual istream& citire(istream& in) {
 
 		Alegere::citire(in);
+
 		cout << "Urmeaza a se citi voturile, urmat de validarea procesului electoral: \n";
+		cout << "Pentru a inceta citirea, apasati enter de 2 ori\n";
+		long long cnp = 0;
+		string cand = "";
+		while (true) {
+			cout << "Incepe turul " << numarTururi << "!\n";
+			while (true) {
+				cout << "Introduceti votantul: " << endl;
+				in >> cnp;
+				getline(in, cand);
+				cout << "Introduceti candidatul: " << endl;
+				getline(in, cand);
+				if (cnp == 0 && cand == "") break;
+				if (valideazaVot(cnp, cand)) {
+					vot[cand].push_back(cnp);
+				}
+				
+			}
+			if (derulareAlegere()) {
+				numarTururi++;
+			}
+			else{
+				electionRan = true;
+				break;
+			}
+		}
+
 		return in;
 	}
 
 	friend ostream& operator<<(ostream& out, const Prezidentiale& prezidentiale) {return prezidentiale.afisare(out);}
 	friend istream& operator>>(istream& in, Prezidentiale& prezidentiale) {return prezidentiale.citire(in);}
 
-	void derulareAlegere() {
+	bool derulareAlegere() {
 
-		
-
-		map<string,float> rezultateTur;
-
-		while ((*(rezultateTur.begin())).second <= 50) {
-			
+		if (numarTururi == 2) {
+			// iau doar primii 2 candidati si ii validez
 		}
+		
+		map <string, float> tur;
+		int voturiTotale = 0;
+
+		for (auto& x : vot) {
+			
+			tur[x.first] += x.second.size();
+			voturiTotale += x.second.size();
+		}
+		cout << voturiTotale << ' ';
+		for (auto& x : tur) {
+			x.second /= voturiTotale;
+		}
+		sort(tur.begin(),tur.end(),cmp);
+		
+		cout << "Rezultatele turului " << numarTururi << " sunt urmatoarele:\n";
+		for (auto& x : tur) {
+			cout << x.first << ": " << x.second << "%\n";
+		}
+
+		return false;
 	}
 };
 
