@@ -907,7 +907,6 @@
 //    out << conference.eventRoom;
 //    out << "Data about the ads: " << endl;
 //
-//    // VIEW POLYMORPHISM EXAMPLE WHEN WRITING
 //
 //    for (auto& x : conference.ads) {
 //        x->present() ;
@@ -948,7 +947,6 @@
 //    std::cout << "Please enter data about the event room: " << endl;
 //    in >> conference.eventRoom;
 //
-//    // VIEW POLYMORPHISM EXAMPLE WHEN READING
 //
 //    std::cout << "Enter data about the ads: " << endl;
 //    for (int i = 1; i <= conference.adsNo; i++) {

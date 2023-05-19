@@ -19,31 +19,37 @@ using namespace std;
 // create read and write from file
 
 class ExistingVoter : public exception {
-	public:
-	const char* what() const throw() {return "Acest votant exista deja!\nMasuri antifrauda au fost luate."; };
+public:
+	const char* what() const throw() {return "Acest votant exista deja!\nMasuri antifrauda au fost luate.\n"; };
 };
 class ExistingCandidate : public exception {
 public:
-	const char* what() const throw() { return "Acest candidat exista deja!\nMasuri antifrauda au fost luate."; };
+	const char* what() const throw() { return "Acest candidat exista deja!\nMasuri antifrauda au fost luate.\n"; };
 };
 class InvalidVoter : public exception {
 public:
-	const char* what() const throw() { return "CNP-ul folosit nu figureaza pe lista de votanti inregistrati!"; };
+	const char* what() const throw() { return "CNP-ul folosit nu figureaza pe lista de votanti inregistrati!\n"; };
 };
-class InvalidChoice : public exception {
+class InvalidCandidate : public exception {
 public:
-	const char* what() const throw() { return "Optiunea aleasa nu figureaza pe lista de candidati!"; };
+	const char* what() const throw() { return "Optiunea aleasa nu figureaza pe lista de candidati!\n"; };
+};
+class ExistingVote : public exception {
+public:
+	const char* what() const throw() { return "Votul acesta a fost facut deja!\nMasuri antifrauda au fost luate.\n"; };
 };
 class WrongID : public exception {
 public:
-	const char* what() const throw() { return "CNP-ul introdus nu este valid (varsta prea mica)/numar invalid!"; };
+	const char* what() const throw() { return "CNP-ul introdus nu este valid (varsta prea mica)/numar invalid!\n"; };
 };
 
 // todo template class
+// a class that for each type of election can make a candidate/voter valid
 
-//template <typename alegere>
-//class Desfasurare {
-//	alegere
+//template <typename Proces>
+//class Election_Sway {
+//	Proces p;
+// 
 //};
 
 class Alegere {
@@ -55,8 +61,6 @@ protected:
 	map <string, vector<long long>> vot; // candidat, cnp
 	bool electionRan;
 
-public:
-	virtual void derulareAlegere() = 0;
 	bool parseID(long long id) {
 		long long mask = 1;
 		for (int i = 1; i <= 13; i++) mask *= 10;
@@ -64,7 +68,7 @@ public:
 		int firstDig = (id % mask) / (mask / 10);
 		mask /= 10;
 		if (firstDig == 5 || firstDig == 6) {
-			int year = 10 * ((id % mask) / (mask / 10)) + (id % (mask/10)) / (mask / 100);
+			int year = 10 * ((id % mask) / (mask / 10)) + (id % (mask / 10)) / (mask / 100);
 			mask /= 100;
 			if (year > 5) return 0; // view cam brut, vom reveni
 		}
@@ -76,7 +80,9 @@ public:
 
 	bool valideazaCandidat(string opt) {
 		try {
-			for (auto& )
+			for (auto& x : invalidC) {
+				if (x == opt) throw InvalidCandidate();
+			}
 			for (auto& x : candidat) {
 				if (x == opt) {
 					throw ExistingCandidate();
@@ -85,29 +91,95 @@ public:
 		}
 		catch (ExistingCandidate& e) {
 			cout << e.what();
-			this->candidat.erase(opt);
-			this->invalidC.insert(opt);
+			this->candidat.erase(find(this->candidat.begin(), this->candidat.end(), opt));
+			this->invalidC.push_back(opt);
+			return false;
+		}
+		catch (InvalidCandidate& i) {
+			cout << i.what();
 			return false;
 		}
 
+		cout << "Candidatul a fost validat si adaugat in baza de date cu succes!\n";
 		return true;
 	}
 
 	bool valideazaVotant(long long cnp) {
 		try {
-			if (this->votant.find(cnp) != this->votant.end()) throw ExistingVoter();
-			if (!this->parseID(cnp)) throw WrongID();
+			for (auto& x : invalidV) {
+				if (x == cnp) throw InvalidVoter();
+			}
+			for (auto& x : votant) {
+				if (x == cnp) {
+					throw ExistingVoter();
+				}
+			}
 		}
-		catch (ExistingVoter& e){ return false;}
-		catch (WrongID& w){ return false;}
+		catch (ExistingVoter& e) {
+			cout << e.what();
+			this->votant.erase(cnp);
+			this->invalidV.insert(cnp);
+			return false;
+		}
+		catch (InvalidVoter& i) {
+			cout << i.what();
+			return false;
+		}
 
+		cout << "Votantul a fost validat si adaugat in baza de date cu succes!\n";
 		return true;
 	}
 
-	bool valideazaVot() {
+	// todo implement
+	bool valideazaVot(long long cnp, string opt) {
+		try {
+			for (auto& x : invalidV) {
+				if (x == cnp) throw InvalidVoter();
+			}
+			for (auto& x : invalidC) {
+				if (x == opt) throw InvalidCandidate();
+			}
+			bool registered = false;
+			for (auto& x : votant) {
+				if (x == cnp) registered = true;
+			}
+			if (!registered) throw InvalidVoter();
+			bool cand = false;
+			for (auto& x : candidat) {
+				if (x == opt) cand = true;
+			}
+			if (!cand) throw InvalidCandidate();
+			if (find(vot[opt].begin(), vot[opt].end(), cnp) != vot[opt].end()) {
+				throw ExistingVote();
+			}
 
+		}
+		catch (InvalidVoter& iv){
+			cout << iv.what();
+			return false;
+		}
+		catch (InvalidCandidate& ic) {
+			cout << ic.what();
+			return false;
+		}
+		catch (ExistingVote& ev){
+			cout << ev.what();
+			this->votant.erase(cnp);
+			this->invalidV.insert(cnp);
 
+			while (find(vot[opt].begin(), vot[opt].end(), cnp) != vot[opt].end()) {
+				vot[opt].erase(find(vot[opt].begin(), vot[opt].end(), cnp));
+			}
+
+			return false;
+		}
+
+		cout << "Votul a fost inregistrat cu succes!\n";
+		return true;
 	}
+
+public:
+	virtual void derulareAlegere() = 0;
 
 	Alegere() {this->electionRan = false;}
 	Alegere(const Alegere& obj) {
@@ -126,7 +198,6 @@ public:
 		this->vot = vot_;
 		this->electionRan = electionRan_;
 	}
-
 	Alegere& operator=(const Alegere& obj) {
 		if (this != &obj) {
 			this->votant = obj.votant;
@@ -161,25 +232,17 @@ public:
 			if (id == 0) break;
 			if (valideazaVotant(id)) {
 				votant.insert(id);
-				cout << "Votantul a fost introdus in baza de date cu succes!" << endl;
-			}
-			else {
-				cout << "Eroare la introducerea ID-ului!" << endl;
 			}
 		}
-		string cand = "";
+		string cand = "o";
 		while (true) {
 			cout << "Introduceti numele candidatului (enter pentru a trece peste): " << endl;
-			getline(in, cand);
+			getline(in, cand); // todo nu merge
 			cout << 'a';
 			if (cand == "") break;
 			cout << 'b';
 			if (valideazaCandidat(cand)) {
 				candidat.push_back(cand);
-				cout << "Candidatul a fost introdus in baza de date cu succes!" << endl;
-			}
-			else {
-				cout << "Eroare la introducerea candidatului!" << endl;
 			}
 		}
 		
@@ -199,7 +262,7 @@ public:
 		this->numarTururi = 1;
 	};
 	Prezidentiale(const Prezidentiale& obj):Alegere(obj) {this->numarTururi = obj.numarTururi, this->turnout = obj.turnout;};
-	Prezidentiale(set<long long> votant_, list<string> candidat_, map<string, vector<long long>> vot_, int numarTururi_, vector<int> turnout_,bool electionRan_):Alegere(votant_, candidat_, vot_, electionRan_)
+	Prezidentiale(set<long long> votant_, set<long long> iv_, list<string> candidat_, list<string> ic_, map<string, vector<long long>> vot_, bool electionRan_, int numarTururi_, vector<int> turnout_):Alegere(votant_, iv_, candidat_, ic_, vot_, electionRan_)
 	{this->numarTururi = numarTururi_, this->turnout = turnout_;};
 
 	Prezidentiale& operator=(const Prezidentiale& obj) {
@@ -228,7 +291,7 @@ public:
 	virtual istream& citire(istream& in) {
 
 		Alegere::citire(in);
-
+		cout << "Urmeaza a se citi voturile, urmat de validarea procesului electoral: \n";
 		return in;
 	}
 
