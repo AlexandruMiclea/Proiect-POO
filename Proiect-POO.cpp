@@ -46,6 +46,7 @@ class WrongID : public exception {
 public:
 	const char* what() const throw() { return "CNP-ul introdus nu este valid (varsta prea mica)/numar invalid!\n"; };
 };
+// todo use
 class InsufCandidates : public exception {
 public:
 	const char* what() const throw() { return "Nu sunt suficienti candidati in cursa!\n"; };
@@ -62,6 +63,7 @@ public:
 
 class Alegere {
 protected:
+	const double eps = 1e-6;
 	set <long long> votant; // cnp-urile se pun individual aici
 	set<long long> invalidV; // cine e invalidat va fi trimis aici
 	list <string> candidat;
@@ -143,7 +145,6 @@ protected:
 		return true;
 	}
 
-	// todo implement
 	bool valideazaVot(long long cnp, string opt) {
 		try {
 			for (auto& x : invalidV) {
@@ -264,14 +265,14 @@ public:
 
 };
 
-// todo implement election in one or 3+ run-off votes
 class Prezidentiale : public Alegere{
+private:
+	vector <map<string,float>> rezultate;
 protected:
 	int numarTururi;
 	vector<map<string, float>> rezultateTur;
 	vector <int> turnout; // poz -> turul poz + 1
-
-	bool cmp(pair<string, float>& a, pair<string, float>& b) { return a.second < b.second; };
+	bool cmp(pair<string, float>& a, pair<string,float>& b) { return a.second < b.second; };
 
 public:
 	Prezidentiale() {
@@ -293,12 +294,13 @@ public:
 	~Prezidentiale() {}
 
 	virtual ostream& afisare(ostream& out) const {
-		out << "Aceasta alegere a fost una prezidentiala." << endl;
-		out << "Aceasta alegere s-a desfasurat in " << this->numarTururi << " tururi." << endl;
-		out << "In cadrul celor " << this->numarTururi << " tururi au fost prezenti urmatorul numar de oameni: " << endl;
-		int tur = 1;
-		for (auto& x : turnout) {
-			out << "Turul " << tur << ": " << x << " voturi validate." << endl;
+		
+		if (!electionRan) {
+			out << "Aceasta alegere inca nu s-a desfasurat!\n";
+		}
+		else {
+			out << "Aceasta alegere a fost una prezidentiala." << endl;
+			out << "Aceasta alegere s-a desfasurat in " << this->numarTururi << " tururi." << endl;
 		}
 
 		return out;
@@ -307,6 +309,7 @@ public:
 	virtual istream& citire(istream& in) {
 
 		Alegere::citire(in);
+		cout << "Doriti inceperea procesului electoral (citirea voturilor pana la sfarsitul alegerilor)?(y/n)\n";
 
 		cout << "Urmeaza a se citi voturile, urmat de validarea procesului electoral: \n";
 		cout << "Pentru a inceta citirea, apasati enter de 2 ori\n";
@@ -327,11 +330,12 @@ public:
 				
 			}
 			if (derulareAlegere()) {
-				numarTururi++;
+				electionRan = true;
+				cout << "Alegerile au luat sfarsit!\n";
+				break;
 			}
 			else{
-				electionRan = true;
-				break;
+				numarTururi++;
 			}
 		}
 
@@ -342,16 +346,13 @@ public:
 	friend istream& operator>>(istream& in, Prezidentiale& prezidentiale) {return prezidentiale.citire(in);}
 
 	bool derulareAlegere() {
-
-		if (numarTururi == 2) {
-			// iau doar primii 2 candidati si ii validez
-		}
 		
 		map <string, float> tur;
+		multimap<float, string, greater<float>> aux;
+
 		int voturiTotale = 0;
 
 		for (auto& x : vot) {
-			
 			tur[x.first] += x.second.size();
 			voturiTotale += x.second.size();
 		}
@@ -359,14 +360,31 @@ public:
 		for (auto& x : tur) {
 			x.second /= voturiTotale;
 		}
-		sort(tur.begin(),tur.end(),cmp);
 		
-		cout << "Rezultatele turului " << numarTururi << " sunt urmatoarele:\n";
 		for (auto& x : tur) {
-			cout << x.first << ": " << x.second << "%\n";
+			aux.insert({x.second, x.first});
 		}
 
-		return false;
+		cout << "Rezultatele turului " << numarTururi << " sunt urmatoarele:\n";
+		for (auto& x : aux) {
+			cout << x.second << ": " << x.first << "%\n";
+		}
+
+		if ((aux.begin()->first + eps) <= 0.5f) {
+			// ne ducem in turul +1
+			rezultate.push_back(tur);
+			vot.clear();
+			if (numarTururi == 1) {
+				candidat.clear();
+				int candidati = 1;
+				for (auto i = aux.begin(); i != aux.end() && candidati <= 2; i++)
+					candidat.push_back((*i).second), candidati++;
+				//for (auto i = candidat.begin(); i != candidat.end(); i++) cout << (*i) << ' ';
+			}
+			return false;
+		}
+
+		return true;
 	}
 };
 
@@ -426,7 +444,7 @@ public:
 //		}
 //	}
 //};
-//
+
 //class EuroParlamentare : public Parlamentare {
 //	map<string, string> AfiliereBloc; // key = bloc, value = partid ex(PPE, PNL)/
 //	int numarTururi;
