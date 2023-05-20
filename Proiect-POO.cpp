@@ -196,31 +196,32 @@ protected:
 		return true;
 	}
 
-	istream& incCitire(istream& in) {
+	void incCitire(istream& in) {
 
 		if (!candidat.empty() && !votant.empty()) {
 			cout << "Deja exista date despre alegatori/alesi. Doriti recitirea lor?(y/n)\n";
-			char ans;
+			char ans = 0;
+			in >> ans;
 			try {
 				while (ans != 'y' && ans != 'n') {
-					cin >> ans;
+					in >> ans;
 					ans = tolower(ans);
 				}
 				throw ans;
 			}
 			catch (char c) {
-				if (c == 'y') citire(in);
+				if (c == 'y') citireDate(in);
 			}
 		}
 		else {
-			citire(in);
+			citireDate(in);
 		}
 
 		cout << "Doriti inceperea alegerilor?(y/n)\n";
 		char ans = 0;
 		try {
 			while (ans != 'y' && ans != 'n') {
-				cin >> ans;
+				in >> ans;
 				ans = tolower(ans);
 			}
 			throw ans;
@@ -228,8 +229,6 @@ protected:
 		catch (char c) {
 			if (c == 'y') procAlegere(in);
 		}
-
-		return in;
 	}
 
 	istream& citireDate(istream& in) {
@@ -267,8 +266,28 @@ protected:
 		return in;
 	}
 
+	istream& preluareVoturi(istream& in) {
+
+		long long cnp = 0;
+		string cand = "";
+		while (true) {
+			cout << "Introduceti votantul: " << endl;
+			in >> cnp;
+			getline(in, cand);
+			cout << "Introduceti candidatul: " << endl;
+			getline(in, cand);
+			transform(cand.begin(), cand.end(), cand.begin(), [](char c) {return tolower(c); });
+			if (cnp == 0 && cand == "") break;
+			if (valideazaVot(cnp, cand)) {
+				vot[cand].push_back(cnp);
+			}
+		}
+
+		return in;
+	}
+	virtual istream& procAlegere(istream&) = 0;
+
 public:
-	virtual bool derulareAlegere() = 0;
 
 	Alegere() { this->electionRan = false; }
 	Alegere(const Alegere& obj) {
@@ -305,248 +324,209 @@ public:
 	virtual ~Alegere() {}
 };
 
-//class Prezidentiale : public Alegere {
-//protected:
-//	int numarTururi;
-//	vector<map<string, float>> rezultateTur;
-//public:
-//	Prezidentiale() {
-//		this->numarTururi = 1;
-//	};
-//	Prezidentiale(const Prezidentiale& obj) :Alegere(obj) { this->numarTururi = obj.numarTururi, this->rezultateTur = obj.rezultateTur; };
-//	Prezidentiale(set<long long> votant_, set<long long> iv_, list<string> candidat_, list<string> ic_, map<string, vector<long long>> vot_, map <string, float> rezultate_, bool electionRan_, int numarTururi_, vector<map<string, float>> rezultateTur_) :Alegere(votant_, iv_, candidat_, ic_, vot_, rezultate_, electionRan_)
-//	{
-//		this->numarTururi = numarTururi_, this->rezultateTur = rezultateTur_;
-//	};
-//
-//	Prezidentiale& operator=(const Prezidentiale& obj) {
-//		if (this != &obj) {
-//			Alegere::operator=(obj);
-//			this->rezultateTur = obj.rezultateTur;
-//			this->numarTururi = obj.numarTururi;
-//		}
-//		return *this;
-//	}
-//
-//	~Prezidentiale() {}
-//
-//	istream& citire(istream& in) {
-//
-//		if (!candidat.empty() && !votant.empty()) {
-//			cout << "Deja exista date despre alegatori/alesi. Doriti recitirea lor?(y/n)\n";
-//			char ans;
-//			try {
-//				while (ans != 'y' && ans != 'n') {
-//					cin >> ans;
-//					ans = tolower(ans);
-//				}
-//				throw ans;
-//			}
-//			catch (char c) {
-//				if (c == 'y') Alegere::citireDate(in);
-//			}
-//		}
-//		else {
-//			Alegere::citireDate(in);
-//		}
-//
-//		cout << "Doriti inceperea alegerilor?(y/n)\n";
-//		char ans = 0;
-//		try {
-//			while (ans != 'y' && ans != 'n') {
-//				cin >> ans;
-//				ans = tolower(ans);
-//			}
-//			throw ans;
-//		}
-//		catch (char c) {
-//			if (c == 'y') this->procAlegere(in);
-//		}
-//
-//		return in;
-//	}
-//
-//	istream& procAlegere(istream& in) {
-//		cout << "Urmeaza a se citi voturile, urmat de validarea procesului electoral: \n";
-//		cout << "Pentru a inceta citirea, apasati 0 apoi enter de 2 ori\n"; // todo fa mai frumos
-//		long long cnp = 0;
-//		string cand = "";
-//		while (true) {
-//			cout << "Incepe turul " << numarTururi << "!\n";
-//			while (true) {
-//				cout << "Introduceti votantul: " << endl;
-//				in >> cnp;
-//				getline(in, cand);
-//				cout << "Introduceti candidatul: " << endl;
-//				getline(in, cand);
-//				transform(cand.begin(), cand.end(), cand.begin(), [](char c) {return tolower(c); });
-//				if (cnp == 0 && cand == "") break;
-//				if (valideazaVot(cnp, cand)) {
-//					vot[cand].push_back(cnp);
-//				}
-//
-//			}
-//			if (derulareAlegere()) {
-//				electionRan = true;
-//				cout << "Alegerile au luat sfarsit!\n";
-//				break;
-//			}
-//			else {
-//				numarTururi++;
-//			}
-//		}
-//
-//		return in;
-//	}
-//
-//	friend ostream& operator<<(ostream& out, const Prezidentiale& prezidentiale) {
-//		out << "Aceasta alegere a fost una prezidentiala." << endl;
-//		out << "Aceasta alegere s-a desfasurat in " << this->numarTururi << " tururi." << endl;
-//		out << "Rezultatele pentru fiecare tur sunt urmatoarele: \n\n";
-//		int tur = 1;
-//		for (auto& x : rezultate) {
-//			out << "Turul " << tur++ << ": \n";
-//			for (auto& y : x) {
-//				out << y.first << ": " << y.second << "%\n";
-//			}
-//			out << '\n';
-//		}
-//		out << "Castigatorul alegerilor este " << (rezultate.end() - 1)->begin()->first << ". Felicitari!\n";
-//	}
-//
-//	friend istream& operator>>(istream& in, Prezidentiale& prezidentiale) {
-//
-//	}
-//
-//	bool derulareAlegere() {
-//
-//		map <string, float> tur;
-//		multimap<float, string, greater<float>> aux;
-//
-//		int voturiTotale = 0;
-//
-//		for (auto& x : vot) {
-//			tur[x.first] += x.second.size();
-//			voturiTotale += x.second.size();
-//		}
-//		cout << voturiTotale << ' ';
-//		for (auto& x : tur) {
-//			x.second /= voturiTotale;
-//		}
-//
-//		for (auto& x : tur) {
-//			aux.insert({ x.second, x.first });
-//		}
-//
-//		cout << "Rezultatele turului " << numarTururi << " sunt urmatoarele:\n";
-//		for (auto& x : aux) {
-//			cout << x.second << ": " << x.first << "%\n";
-//		}
-//		this->rezultate.push_back(tur);
-//		if ((aux.begin()->first + eps) <= 0.5f) {
-//			// ne ducem in turul +1
-//
-//			vot.clear();
-//			if (numarTururi == 1) {
-//				candidat.clear();
-//				int candidati = 1;
-//				for (auto i = aux.begin(); i != aux.end() && candidati <= 2; i++)
-//					candidat.push_back((*i).second), candidati++;
-//				//for (auto i = candidat.begin(); i != candidat.end(); i++) cout << (*i) << ' ';
-//			}
-//			return false;
-//		}
-//
-//		return true;
-//	}
-//};
-//
-//class Parlamentare : public Alegere {
-//public:
-//	Parlamentare() {};
-//	Parlamentare(const Parlamentare& obj) :Alegere(obj) {};
-//	Parlamentare(set<long long> votant_, set<long long> iv_, list<string> candidat_, list<string> ic_, map<string, vector<long long>> vot_, map <string, float> rezultate_, bool electionRan_) :Alegere(votant_, iv_, candidat_, ic_, vot_, rezultate_, electionRan_);
-//
-//	Parlamentare& operator=(const Parlamentare& obj) {
-//		if (this != &obj) {
-//			Alegere::operator=(obj);
-//		}
-//		return *this;
-//	}
-//
-//	~Parlamentare() {}
-//
-//	virtual ostream& afisare(ostream& out) const {
-//
-//		if (!electionRan) {
-//			out << "Aceasta alegere inca nu s-a desfasurat!\n";
-//		}
-//		else {
-//			out << "Aceasta alegere a fost una parlamentara." << endl;
-//			out << "Rezultatele alegerilor sunt urmatoarele: \n\n";
-//			for (auto& y : rezultate) {
-//				out << y.first << ": " << y.second << "%\n";
-//			}
-//			out << "Castigatorul alegerilor este " << (rezultate.rbegin())->first << ". Felicitari!\n";
-//		}
-//
-//		return out;
-//	}
-//
-//
-//
-//	istream& procAlegere(istream& in) {
-//		cout << "Urmeaza a se citi voturile, urmat de validarea procesului electoral: \n";
-//		cout << "Pentru a inceta citirea, apasati 0 apoi enter de 2 ori\n"; // todo fa mai frumos
-//		long long cnp = 0;
-//		string cand = "";
-//		while (true) {
-//			cout << "Introduceti votantul: " << endl;
-//			in >> cnp;
-//			getline(in, cand);
-//			cout << "Introduceti candidatul: " << endl;
-//			getline(in, cand);
-//			transform(cand.begin(), cand.end(), cand.begin(), [](char c) {return tolower(c); });
-//			if (cnp == 0 && cand == "") break;
-//			if (valideazaVot(cnp, cand)) {
-//				vot[cand].push_back(cnp);
-//			}
-//		}
-//		derulareAlegere();
-//		cout << "Alegerile au luat sfarsit!\n";
-//
-//		return in;
-//	}
-//
-//	friend ostream& operator<<(ostream& out, const Parlamentare& Parlamentare) { return Parlamentare.afisare(out); }
-//	friend istream& operator>>(istream& in, Parlamentare& Parlamentare) { return Parlamentare.citire(in); }
-//
-//	bool derulareAlegere() {
-//
-//		map <string, float> voturi;
-//
-//		int voturiTotale = 0;
-//
-//		for (auto& x : this->vot) {
-//			voturi[x.first] += x.second.size();
-//			voturiTotale += x.second.size();
-//		}
-//		cout << voturiTotale << ' ';
-//		for (auto& x : voturi) {
-//			x.second /= voturiTotale;
-//		}
-//
-//		cout << "Rezultatele sunt urmatoarele:\n";
-//		for (auto& x : voturi) {
-//			cout << x.first << ": " << x.second << "%\n";
-//		}
-//		rezultate = voturi;
-//
-//		electionRan = true;
-//		return true;
-//	}
-//};
-//
+// done
+class Prezidentiale : public Alegere {
+protected:
+	int numarTururi;
+	vector<map<string, float>> rezultateTur;
+
+	istream& procAlegere(istream& in) {
+		cout << "Urmeaza a se citi voturile, urmat de validarea procesului electoral: \n";
+		cout << "Pentru a inceta citirea, apasati 0 apoi enter de 2 ori\n"; // todo fa mai frumos
+		long long cnp = 0;
+		string cand = "";
+		while (true) {
+			cout << "Incepe turul " << numarTururi << "!\n";
+			preluareVoturi(in);
+			if (derulareAlegere()) {
+				electionRan = true;
+				cout << "Alegerile au luat sfarsit!\n";
+				break;
+			}
+			else {
+				numarTururi++;
+			}
+		}
+
+		return in;
+	}
+	bool derulareAlegere() {
+
+		map <string, float> tur;
+		multimap<float, string, greater<float>> aux;
+
+		int voturiTotale = 0;
+
+		for (auto& x : vot) {
+			tur[x.first] += x.second.size();
+			voturiTotale += x.second.size();
+		}
+		for (auto& x : tur) {
+			x.second /= voturiTotale;
+		}
+
+		for (auto& x : tur) {
+			aux.insert({ x.second, x.first });
+		}
+
+		cout << "Rezultatele turului " << numarTururi << " sunt urmatoarele:\n";
+		for (auto& x : aux) {
+			cout << x.second << ": " << x.first << "%\n";
+		}
+		this->rezultateTur.push_back(tur);
+		if ((aux.begin()->first + eps) <= 0.5f) {
+			// ne ducem in turul +1
+
+			vot.clear();
+			if (numarTururi == 1) {
+				candidat.clear();
+				int candidati = 1;
+				for (auto i = aux.begin(); i != aux.end() && candidati <= 2; i++)
+					candidat.push_back((*i).second), candidati++;
+				//for (auto i = candidat.begin(); i != candidat.end(); i++) cout << (*i) << ' ';
+			}
+			return false;
+		}
+
+		return true;
+	}
+public:
+	Prezidentiale() {
+		this->numarTururi = 1;
+	};
+	Prezidentiale(const Prezidentiale& obj) :Alegere(obj) { this->numarTururi = obj.numarTururi, this->rezultateTur = obj.rezultateTur; };
+	Prezidentiale(set<long long> votant_, set<long long> iv_, list<string> candidat_, list<string> ic_, map<string, vector<long long>> vot_, map <string, float> rezultate_, bool electionRan_, int numarTururi_, vector<map<string, float>> rezultateTur_) 
+	:Alegere(votant_, iv_, candidat_, ic_, vot_, rezultate_, electionRan_)
+	{
+		this->numarTururi = numarTururi_, this->rezultateTur = rezultateTur_;
+	};
+
+	Prezidentiale& operator=(const Prezidentiale& obj) {
+		if (this != &obj) {
+			Alegere::operator=(obj);
+			this->rezultateTur = obj.rezultateTur;
+			this->numarTururi = obj.numarTururi;
+		}
+		return *this;
+	}
+
+	~Prezidentiale() {}
+
+	friend ostream& operator<<(ostream& out, const Prezidentiale& obj) {
+
+		if (!obj.electionRan) {
+			out << "Aceasta alegere inca nu s-a desfasurat!\n";
+		}
+		else {
+			out << "Aceasta alegere a fost una prezidentiala." << endl;
+			out << "Aceasta alegere s-a desfasurat in " << obj.numarTururi << " tururi." << endl;
+			out << "Rezultatele pentru fiecare tur sunt urmatoarele: \n\n";
+			int tur = 1;
+			for (auto& x : obj.rezultateTur) {
+				out << "Turul " << tur++ << ": \n";
+				for (auto& y : x) {
+					out << y.first << ": " << y.second * 100 << "%\n";
+				}
+				out << '\n';
+			}
+			out << "Castigatorul alegerilor este " << (obj.rezultateTur.end() - 1)->rbegin()->first << ". Felicitari!\n";
+		}
+
+		return out;
+	}
+
+	friend istream& operator>>(istream& in, Prezidentiale& obj) {
+		obj.incCitire(in);
+
+		return in;
+	}
+};
+
+class Parlamentare : public Alegere {
+protected:
+	istream& procAlegere(istream& in) {
+		cout << "Urmeaza a se citi voturile, urmat de validarea procesului electoral: \n";
+		cout << "Pentru a inceta citirea, apasati 0 apoi enter de 2 ori\n"; // todo fa mai frumos
+		long long cnp = 0;
+		string cand = "";
+		while (true) {
+			cout << "Introduceti votantul: " << endl;
+			in >> cnp;
+			getline(in, cand);
+			cout << "Introduceti candidatul: " << endl;
+			getline(in, cand);
+			transform(cand.begin(), cand.end(), cand.begin(), [](char c) {return tolower(c); });
+			if (cnp == 0 && cand == "") break;
+			if (valideazaVot(cnp, cand)) {
+				vot[cand].push_back(cnp);
+			}
+		}
+		derulareAlegere();
+		cout << "Alegerile au luat sfarsit!\n";
+
+		return in;
+	}
+
+	bool derulareAlegere() {
+
+		map <string, float> voturi;
+
+		int voturiTotale = 0;
+
+		for (auto& x : this->vot) {
+			voturi[x.first] += x.second.size();
+			voturiTotale += x.second.size();
+		}
+		cout << voturiTotale << ' ';
+		for (auto& x : voturi) {
+			x.second /= voturiTotale;
+		}
+
+		cout << "Rezultatele sunt urmatoarele:\n";
+		for (auto& x : voturi) {
+			cout << x.first << ": " << x.second << "%\n";
+		}
+		rezultate = voturi;
+
+		electionRan = true;
+		return true;
+	}
+public:
+	Parlamentare() {};
+	Parlamentare(const Parlamentare& obj) :Alegere(obj) {};
+	Parlamentare(set<long long> votant_, set<long long> iv_, list<string> candidat_, list<string> ic_, map<string, vector<long long>> vot_, map <string, float> rezultate_, bool electionRan_) 
+	:Alegere(votant_, iv_, candidat_, ic_, vot_, rezultate_, electionRan_) {};
+
+	Parlamentare& operator=(const Parlamentare& obj) {
+		if (this != &obj) {
+			Alegere::operator=(obj);
+		}
+		return *this;
+	}
+
+	~Parlamentare() {}
+
+	friend ostream& operator<<(ostream& out, const Parlamentare& obj) { 
+		if (!obj.electionRan) {
+			out << "Aceasta alegere inca nu s-a desfasurat!\n";
+		}
+		else {
+			out << "Aceasta alegere a fost una parlamentara." << endl;
+			out << "Rezultatele alegerilor sunt urmatoarele: \n\n";
+			for (auto& y : obj.rezultate) {
+				out << y.first << ": " << y.second << "%\n";
+			}
+			out << "Castigatorul alegerilor este " << (obj.rezultate.rbegin())->first << ". Felicitari!\n";
+		}
+
+		return out;
+	}
+
+	friend istream& operator>>(istream& in, Parlamentare& Parlamentare) { return Parlamentare.citire(in); }
+
+	
+};
+
 //class EuroParlamentare : public Parlamentare {
 //protected:
 //	map<string, string> afiliereBloc; // key = partid, value = bloc ex(PNL, PPE)/
@@ -689,17 +669,18 @@ public:
 //	}
 //};
 
-
+// done
 class Locale : public Alegere {
 protected:
-	map <string, float> rezultate;
 	string zona;
 public:
 	Locale() { this->zona = ""; };
 
 	Locale(const Locale& obj) :Alegere(obj) { this->zona = obj.zona; };
-	Locale(set<long long> votant_, set<long long> iv_, list<string> candidat_, list<string> ic_, map<string, vector<long long>> vot_, bool electionRan_, int numarTururi_, vector<map<string, float>> rezultateTur_, vector<int> turnout_)
-		:Alegere(votant_, iv_, candidat_, ic_, vot_, electionRan_) {};
+	Locale(set<long long> votant_, set<long long> iv_, list<string> candidat_, list<string> ic_, map<string, vector<long long>> vot_, map <string, float> rezultate_, bool electionRan_, string zona_)
+		:Alegere(votant_, iv_, candidat_, ic_, vot_, rezultate_, electionRan_) {
+			this->zona = zona_;
+		};
 
 	Locale& operator=(const Locale& obj) {
 		if (this != &obj) {
@@ -717,20 +698,9 @@ public:
 
 		cout << "Urmeaza a se citi voturile, urmat de validarea procesului electoral: \n";
 		cout << "Pentru a inceta citirea, apasati 0 apoi enter de 2 ori\n"; // todo fa mai frumos
-		long long cnp = 0;
-		string cand = "";
-		while (true) {
-			cout << "Introduceti votantul: " << endl;
-			in >> cnp;
-			getline(in, cand);
-			cout << "Introduceti candidatul: " << endl;
-			getline(in, cand);
-			transform(cand.begin(), cand.end(), cand.begin(), [](char c) {return tolower(c); });
-			if (cnp == 0 && cand == "") break;
-			if (valideazaVot(cnp, cand)) {
-				vot[cand].push_back(cnp);
-			}
-		}
+
+		preluareVoturi(in);
+		
 		derulareAlegere();
 		cout << "Alegerile au luat sfarsit!\n";
 
@@ -747,7 +717,6 @@ public:
 			voturi[x.first] += x.second.size();
 			voturiTotale += x.second.size();
 		}
-		cout << voturiTotale << ' ';
 		for (auto& x : voturi) {
 			x.second /= voturiTotale;
 		}
@@ -770,18 +739,18 @@ public:
 			out << "Aceasta alegere a fost una locala. S-a desfasurat pentru zona " << obj.zona << "." << endl;
 			out << "Rezultatele alegerilor sunt urmatoarele: \n\n";
 			for (auto& y : obj.rezultate) {
-				out << y.first << ": " << y.second << "%\n";
+				out << y.first << ": " << y.second * 100 << "%\n";
 			}
-			out << "Castigatorul alegerilor este " << (obj.rezultate.rbegin())->first << ". Felicitari!\n";
+			out << "\nCastigatorul alegerilor este " << (obj.rezultate.rbegin())->first << ". Felicitari!\n";
 		}
 
 		return out;
 	}
 	friend istream& operator>>(istream& in, Locale& obj) { 
 		obj.incCitire(in);
-	}
 
-	
+		return in;
+	}
 };
 
 class Menu {
@@ -803,9 +772,6 @@ Menu* Menu::instance = nullptr;
 int main() {
 	Menu* meniu = Menu::getInstance();
 
-	Locale p;
-	cin >> p;
-	cout << p;
 
 	return 0;
 }
