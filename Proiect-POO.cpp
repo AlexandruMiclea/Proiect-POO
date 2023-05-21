@@ -325,7 +325,6 @@ public:
 	virtual ~Alegere() {}
 };
 
-// done
 class Prezidentiale : public Alegere {
 protected:
 	int numarTururi;
@@ -443,7 +442,6 @@ public:
 	}
 };
 
-// done
 class Parlamentare : public Alegere {
 protected:
 	istream& procAlegere(istream& in) {
@@ -533,7 +531,6 @@ public:
 	
 };
 
-// done
 class EuroParlamentare : public Parlamentare {
 protected:
 	map<string, string> afiliereBloc; // key = partid, value = bloc ex(PNL, PPE)/
@@ -639,7 +636,6 @@ public:
 	}
 };
 
-// done
 class Locale : public Alegere {
 protected:
 	string zona;
