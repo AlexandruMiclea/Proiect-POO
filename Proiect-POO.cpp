@@ -322,7 +322,7 @@ protected:
 	int numarIntrebari;
 	Intrebari intrebari;
 	Raspunsuri raspunsuri;
-	vector<multimap <string, float, greater<int>>> rezultateMulti;
+	vector<multimap <float, string, greater<float>>> rezultateMulti;
 
 	istream& citireDate(istream& in) {
 		cout << "Pentru o buna desfasurare a referendumului, se vor citi CNP-urile votantilor, " << endl;
@@ -347,7 +347,7 @@ protected:
 
 		}
 
-		if (typeid(intrebari) == typeid(string)) {
+		if (this->numarIntrebari == 1) {
 			while (true) {
 				getline(in, intrebari); // trebuie pt ca e pretentios
 				cout << "Introduceti intrebarea: " << endl;
@@ -393,16 +393,13 @@ protected:
 		this->procAlegere<intrebari, raspunsuri>(in);
 		return in;
 	}
-
-	istream& procAlegere(istream& in) {return in;};
-
-	template <class intrebari, class raspunsuri>
+	
 	istream& procAlegere(istream& in) {
 		if (this->numarIntrebari == 1) {
 			cout << "Urmeaza a se citi voturile, urmat de validarea procesului electoral: \n";
 			cout << "Pentru a inceta citirea, apasati 0, apoi enter x2\n";
 			cout << "Intrebarea referendumului este: \n";
-			cout << this->intrebari;
+			//cout << this->intrebari;
 			long long cnp = 0;
 			string rasp = "";
 			while (true) {
@@ -524,7 +521,7 @@ public:
 				out << obj.intrebari[i] << endl;
 				out << "Rezultatele sunt urmatoarele: \n\n";
 				for (auto& y : obj.rezultateMulti[i]) {
-					out << y.first << ": " << y.second * 100 << "%\n";
+					out << y.second << ": " << y.first * 100 << "%\n";
 				}
 				out << '\n';
 				out << "Raspunsul castigator este " << (obj.rezultateMulti.end() - 1)->begin()->first << ".\n";
