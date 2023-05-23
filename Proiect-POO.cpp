@@ -225,6 +225,7 @@ protected:
 		cout << "Pentru o buna desfasurare a procesului electoral, se vor citi CNP-urile votantilor, " << endl;
 		cout << "urmat de lista de candidati. Dupa care se vor exprima dorintele de vot." << endl;
 		string inp = "";
+		getline(in,inp);
 		while (true) {
 			cout << "Introduceti CNP-ul votantului (enter x2 pentru a inceta introducerea): " << endl;
 			getline(in, inp);
@@ -1072,12 +1073,12 @@ public:
 		        while (input != "continue") {
 		        int pos = 0;
 		
-		            std::cout << "1. Print event (print_event)" << endl;
+		            std::cout << "1. Print alegere (print_alegere)" << endl;
 		            std::cout << "2. Continua catre alte instructiuni (continue)" << endl;
 		            std::cin >> input;
 		            std::transform(input.begin(), input.end(), input.begin(), ::tolower);
 		
-		            if (input == "print_event" || input == "pe") {
+		            if (input == "print_alegere" || input == "pa") {
 		                if (0 < alegeri.size()) {
 		                    std::cout << "Alegeti indexul: 1 -> " << alegeri.size() << ": ";
 		                    std::cin >> pos;
