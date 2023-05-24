@@ -71,7 +71,7 @@ protected:
 		if (firstDig == 5 || firstDig == 6) {
 			int year = 10 * ((id % mask) / (mask / 10)) + (id % (mask / 10)) / (mask / 100);
 			mask /= 100;
-			if (year > 5) return 0; // view cam brut, vom reveni
+			if (year > 5) return 0; 
 		}
 		else if (firstDig == 3 || firstDig == 4 || firstDig == 7 || firstDig == 8 || firstDig == 9 || firstDig == 0) return false;
 
@@ -248,7 +248,7 @@ protected:
 		while (true) {
 			cout << "Introduceti numele candidatului (enter pentru a inceta introducerea): " << endl;
 			getline(in, cand);
-			transform(cand.begin(), cand.end(), cand.begin(), [](char c) {return tolower(c); }); // view lambda expresii suntem smenari
+			transform(cand.begin(), cand.end(), cand.begin(), [](char c) {return tolower(c); });
 			if (cand == "") break;
 			if (valideazaCandidat(cand)) {
 				this->candidat.push_back(cand);
@@ -316,7 +316,6 @@ public:
 	virtual ~Alegere() {}
 };
 
-// todo work on this shit
 template <class Intrebari, class Raspunsuri>
 class Referendum : public Alegere {
 protected:
@@ -353,7 +352,7 @@ protected:
 				getline(in, intrebari); // trebuie pt ca e pretentios
 				cout << "Introduceti intrebarea: " << endl;
 				getline(in, intrebari);
-				transform(intrebari.begin(), intrebari.end(), intrebari.begin(), [](char c) {return tolower(c); }); // view lambda expresii suntem smenari
+				transform(intrebari.begin(), intrebari.end(), intrebari.begin(), [](char c) {return tolower(c); });
 				if (intrebari == "") continue;
 				break;
 			}
@@ -362,7 +361,7 @@ protected:
 				getline(in, raspuns);
 				cout << "Introduceti raspuns (enter pt skip):\n";
 				getline(in, raspuns);
-				transform(raspuns.begin(), raspuns.end(), raspuns.begin(), [](char c) {return tolower(c); }); // view lambda expresii suntem smenari
+				transform(raspuns.begin(), raspuns.end(), raspuns.begin(), [](char c) {return tolower(c); });
 				if(raspuns == "") break;
 				this->raspunsuri.push_back(raspuns);
 			}
@@ -374,7 +373,7 @@ protected:
 					getline(in, intrebare);
 					cout << "Introduceti intrebarea: " << endl;
 					getline(in, intrebare);
-					transform(intrebare.begin(), intrebare.end(), intrebare.begin(), [](char c) {return tolower(c); }); // view lambda expresii suntem smenari
+					transform(intrebare.begin(), intrebare.end(), intrebare.begin(), [](char c) {return tolower(c); });
 					if (intrebare == "") break;
 				}
 				vector <string> r_aux;
@@ -383,7 +382,7 @@ protected:
 					getline(in, raspuns);
 					cout << "Introduceti raspuns (enter pt skip):\n";
 					getline(in, raspuns);
-					transform(raspuns.begin(), raspuns.end(), raspuns.begin(), [](char c) {return tolower(c); }); // view lambda expresii suntem smenari
+					transform(raspuns.begin(), raspuns.end(), raspuns.begin(), [](char c) {return tolower(c); });
 					if (raspuns == "") break;
 					this->r_aux.push_back(raspuns);
 				}
